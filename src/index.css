@@ -1,11 +1,13 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Configuración global para fondo oscuro */
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  background-color: #0f172a; /* Slate 900 */
-  color: white;
+@layer base {
+  html, body, #root {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    /* Color de fondo Slate-900 para que el modo oscuro sea real */
+    background-color: #0f172a;
+    color: white;
+    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
 }
