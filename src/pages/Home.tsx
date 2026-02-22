@@ -68,13 +68,7 @@ export const Home = () => {
             Abrir Editor <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
-
       </div>
-
-      {/* Footer sutil */}
-      <footer className="mt-20 text-slate-500 text-sm font-medium tracking-widest uppercase opacity-50">
-        SeeQL Engine v1.0 • 2026
-      </footer>
     </div>
   );
 };
