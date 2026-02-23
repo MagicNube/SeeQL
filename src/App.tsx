@@ -5,13 +5,15 @@ import { Sandbox } from './pages/Sandbox';
 import { Lecciones } from './pages/Lecciones';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { Landing } from './pages/Landing';
 
 function App() {
   return (
     <BrowserRouter>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/sandbox" element={<Sandbox />} />
         <Route path="/lecciones" element={<Lecciones />} />
         <Route path="/login" element={<Login />} />

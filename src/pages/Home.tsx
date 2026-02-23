@@ -1,72 +1,74 @@
 import { Link } from 'react-router-dom';
-import { Database, GraduationCap, ArrowRight, Sparkles } from 'lucide-react';
+import { GraduationCap, LayoutGrid, Lock, ArrowRight } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export const Home = () => {
+  const { user } = useAuth();
+
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-[#0f172a] flex flex-col items-center justify-center px-4 relative overflow-hidden">
+    <div className="min-h-[calc(100vh-64px)] bg-[#0f172a] flex flex-col items-center justify-center p-6 relative overflow-hidden">
 
-      {/* Decoración de fondo (Efecto de luces difuminadas) */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/10 rounded-full blur-[120px]" />
+      {/* Fondo decorativo */}
+      <div className="absolute top-[-10%] left-[-10%] w-125 h-125 bg-blue-600/10 rounded-full blur-[120px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-125 h-125 bg-emerald-600/10 rounded-full blur-[120px]" />
 
-      {/* Hero Section */}
-      <div className="text-center z-10 mb-16">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold mb-6 uppercase tracking-widest">
-          <Sparkles className="w-3 h-3" />
-          Plataforma Interactiva TFG
-        </div>
-        <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight">
-          Aprende SQL <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">viendo</span> lo que ocurre
-        </h1>
-        <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          Domina las bases de datos con feedback visual en tiempo real.
-          Experimenta libremente o supera nuestros retos diseñados para ti.
-        </p>
-      </div>
-
-      {/* Grid de Tarjetas */}
-      <div className="grid md:grid-cols-2 gap-8 max-w-5xl w-full z-10">
-
-        {/* TARJETA MODO APRENDIZAJE */}
-        <div className="group relative bg-slate-800/40 backdrop-blur-md p-10 rounded-[2.5rem] border border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 flex flex-col items-start shadow-2xl">
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[2.5rem]" />
-
-          <div className="bg-blue-500/20 p-4 rounded-2xl mb-8 group-hover:scale-110 transition-transform duration-300">
-            <GraduationCap className="w-10 h-10 text-blue-400" />
-          </div>
-
-          <h2 className="text-3xl font-bold text-white mb-4">Modo Aprendizaje</h2>
-          <p className="text-slate-400 text-lg mb-10 text-left leading-relaxed">
-            Un camino guiado por niveles. Resuelve acertijos SQL y desbloquea nuevos conceptos paso a paso.
+      <div className="max-w-5xl w-full z-10">
+        <div className="text-center mb-16">
+          <span className="px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold tracking-widest uppercase mb-6 inline-block">
+            Panel de Control
+          </span>
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-4">
+            ¿Qué quieres hacer hoy?
+          </h1>
+          <p className="text-slate-400 text-lg">
+            {user ? `Bienvenido de nuevo, ${user.user_metadata.full_name || 'estudiante'}` : 'Explora SeeQL como invitado o identifícate para guardar tu progreso'}
           </p>
-
-          <Link
-            to="/lecciones"
-            className="mt-auto w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-900/40 hover:shadow-blue-600/20 active:scale-95"
-          >
-            Empezar Curso <ArrowRight className="w-5 h-5" />
-          </Link>
         </div>
 
-        {/* TARJETA SANDBOX */}
-        <div className="group relative bg-slate-800/40 backdrop-blur-md p-10 rounded-[2.5rem] border border-slate-700/50 hover:border-emerald-500/50 transition-all duration-300 flex flex-col items-start shadow-2xl">
-          <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[2.5rem]" />
+        <div className="grid md:grid-cols-2 gap-8">
 
-          <div className="bg-emerald-500/20 p-4 rounded-2xl mb-8 group-hover:scale-110 transition-transform duration-300">
-            <Database className="w-10 h-10 text-emerald-400" />
+          {/* MÓDULO LECCIONES */}
+          <div className={`group relative p-8 rounded-[2.5rem] border transition-all duration-500 ${
+            user
+            ? 'bg-slate-800/40 border-slate-700/50 hover:border-blue-500/50 hover:bg-slate-800/60'
+            : 'bg-slate-900/40 border-slate-800 opacity-75 grayscale-[0.5]'
+          }`}>
+            <div className="bg-blue-600/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
+              <GraduationCap className="text-blue-400 w-8 h-8" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-3 flex items-center gap-2">
+              Modo Aprendizaje
+              {!user && <Lock className="w-4 h-4 text-slate-500" />}
+            </h3>
+            <p className="text-slate-400 mb-8 leading-relaxed">
+              Sigue un camino guiado por niveles. Resuelve acertijos SQL y desbloquea conceptos paso a paso.
+            </p>
+
+            {user ? (
+              <Link to="/lecciones" className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-900/20">
+                Continuar curso <ArrowRight className="w-5 h-5" />
+              </Link>
+            ) : (
+              <Link to="/login" className="w-full py-4 bg-slate-700 text-slate-300 font-bold rounded-2xl flex items-center justify-center gap-2 border border-slate-600 hover:bg-slate-600 transition-all">
+                Inicia sesión para entrar
+              </Link>
+            )}
           </div>
 
-          <h2 className="text-3xl font-bold text-white mb-4">Sandbox Libre</h2>
-          <p className="text-slate-400 text-lg mb-10 text-left leading-relaxed">
-            Entorno sin restricciones. Crea tablas, inserta datos o carga tus propios archivos CSV para practicar.
-          </p>
+          {/* MÓDULO SANDBOX (Siempre libre) */}
+          <div className="group relative p-8 rounded-[2.5rem] bg-slate-800/40 border border-slate-700/50 hover:border-emerald-500/50 hover:bg-slate-800/60 transition-all duration-500">
+            <div className="bg-emerald-600/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
+              <LayoutGrid className="text-emerald-400 w-8 h-8" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-3">Sandbox Libre</h3>
+            <p className="text-slate-400 mb-8 leading-relaxed">
+              Entorno sin restricciones. Crea tablas, inserta datos o carga tus propios archivos CSV para practicar libremente.
+            </p>
+            <Link to="/sandbox" className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-900/20">
+              Abrir editor <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
 
-          <Link
-            to="/sandbox"
-            className="mt-auto w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-900/40 hover:shadow-emerald-600/20 active:scale-95"
-          >
-            Abrir Editor <ArrowRight className="w-5 h-5" />
-          </Link>
         </div>
       </div>
     </div>
