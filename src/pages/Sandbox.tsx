@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { SqlEditor } from '../components/editor/SqlEditor';
-import { useSqlVisualizer, evaluateWhere } from '../hooks/useSqlVisualizer';
+import { useSqlVisualizer } from '../hooks/useSqlVisualizer';
+import { DatosPreview } from '../components/DatosPreview';
 
 type EsquemaId = 'facil_biblioteca' | 'medio_gym' | 'dificil_aeropuerto';
 
@@ -42,7 +43,13 @@ export default function Sandbox() {
 
   const [viewModePizarra, setViewModePizarra] = useState<'estructura' | 'datos'>('estructura');
 
-  const { activeTables, whereAST } = useSqlVisualizer(consulta);
+  const tablesForPreview = useMemo(() => {
+    return Object.entries(previewDatos).map(([nombre, filas]) => ({
+      tableName: nombre,
+      columns: estructuraActual[nombre] || [],
+      rows: filas
+    }));
+  }, [previewDatos, estructuraActual]);
 
   useEffect(() => {
     async function cargarEntorno() {
@@ -213,58 +220,7 @@ export default function Sandbox() {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-wrap gap-6 justify-center items-start">
-                {Object.entries(previewDatos).map(([nombreTabla, filas]) => {
-                  const isTableActive = activeTables.length === 0 || activeTables.includes(nombreTabla);
-                  const isTargetTable = activeTables.includes(nombreTabla);
-
-                  const containerOpacity = isTableActive ? 'opacity-100' : 'opacity-40 grayscale';
-                  const containerBorder = isTargetTable ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-slate-700';
-                  const headerBg = isTargetTable ? 'bg-blue-900/30' : 'bg-slate-800/80';
-                  const headerText = isTargetTable ? 'text-blue-300' : 'text-slate-200';
-
-                  return (
-                    <div key={nombreTabla} className={`max-w-md bg-[#1e293b] rounded-lg border shadow-md overflow-hidden flex flex-col transition-all duration-300 ${containerOpacity} ${containerBorder}`}>
-                      <div className={`border-b border-slate-700 p-2.5 flex items-center justify-between transition-colors duration-300 ${headerBg}`}>
-                        <span className={`font-semibold text-xs tracking-wide transition-colors duration-300 ${headerText}`}>
-                           {nombreTabla}
-                        </span>
-                        <span className="text-[9px] text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-700">Muestra: 5 filas</span>
-                      </div>
-                      <div className="overflow-x-auto p-1">
-                        <table className="w-full text-left text-[10px]">
-                          <thead className="bg-[#0f172a] text-slate-400">
-                            <tr>
-                              {filas[0] ? Object.keys(filas[0]).map(k => <th key={k} className="p-2 font-medium border-b border-slate-800 whitespace-nowrap">{k}</th>) : <th className="p-2">Sin datos</th>}
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-800">
-                            {filas.length > 0 ? filas.map((f, i) => {
-                              const isRowMatch = isTableActive && evaluateWhere(f, whereAST);
-                              const isHighlighted = isTargetTable && isRowMatch;
-
-                              const rowBg = isHighlighted ? 'bg-green-900/20' : 'hover:bg-slate-800/50';
-                              const dimRow = !isRowMatch && isTargetTable ? 'opacity-30' : 'opacity-100';
-                              const textColor = isHighlighted ? 'text-green-300' : 'text-slate-300';
-                              const borderLeft = isHighlighted ? 'border-l-2 border-green-500' : '';
-
-                              return (
-                                <tr key={i} className={`transition-all duration-300 ${rowBg} ${dimRow} ${borderLeft}`}>
-                                  {Object.values(f).map((val: any, j) => (
-                                    <td key={j} className={`p-2 truncate max-w-32 transition-colors duration-300 ${textColor}`} title={String(val)}>{String(val)}</td>
-                                  ))}
-                                </tr>
-                              );
-                            }) : (
-                              <tr><td className="p-4 text-center text-slate-500 italic">Tabla sin registros</td></tr>
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <DatosPreview query={consulta} tables={tablesForPreview} />
             )}
           </div>
         </section>
@@ -281,11 +237,11 @@ export default function Sandbox() {
           <div className="flex-1 overflow-auto bg-[#0a0f1d] p-0 flex flex-col">
             <div className="p-4 border-b border-slate-800/50 shrink-0">
               {loadingOutput ? (
-                 <span className="text-xs text-blue-400 font-mono animate-pulse">Ejecutando consulta...</span>
+                  <span className="text-xs text-blue-400 font-mono animate-pulse">Ejecutando consulta...</span>
               ) : (
-                 <span className={`text-xs font-mono ${consoleLog.status === 'success' ? 'text-emerald-400' : consoleLog.status === 'error' ? 'text-red-400' : 'text-slate-500'}`}>
-                   {consoleLog.message}
-                 </span>
+                  <span className={`text-xs font-mono ${consoleLog.status === 'success' ? 'text-emerald-400' : consoleLog.status === 'error' ? 'text-red-400' : 'text-slate-500'}`}>
+                    {consoleLog.message}
+                  </span>
               )}
             </div>
 
