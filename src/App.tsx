@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/layout/Navbar';
 import { Home } from './pages/Home';
 import Sandbox from './pages/Sandbox';
-import { Lecciones } from './pages/Lecciones';
+import Lecciones from './pages/Lecciones';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Landing } from './pages/Landing';

@@ -1,197 +1,123 @@
-export type NivelLeccion = 'basico' | 'intermedio' | 'avanzado';
-export type EsquemaId = 'facil_biblioteca' | 'medio_gym' | 'dificil_aeropuerto';
+// src/data/lecciones.ts
 
-export interface Leccion {
-  id: string;
-  orden: number;
-  titulo: string;
-  nivel: NivelLeccion;
-  esquema: EsquemaId;
-  teoria: string;
-  objetivo: string;
-  querySolucion: string;
-  pistas: string[];
+export type Dificultad = 'Fácil' | 'Medio' | 'Difícil';
+export type Esquema = 'Biblioteca' | 'Gimnasio' | 'Aeropuerto';
+
+export interface FaseLeccion {
+  nivel: number; // 1, 2 o 3
+  dificultad: Dificultad;
+  esquema: Esquema;
+  enunciado: string;
+  codigoInicial?: string;
+  solucionEsperada: string;
 }
 
-export const planDeEstudios: Leccion[] = [
+export interface Leccion {
+  id: number;
+  titulo: string;
+  concepto: string;
+  fases: FaseLeccion[];
+}
+
+export const LECCIONES: Leccion[] = [
   {
-    id: "lec-1-1-select-all",
-    orden: 1,
-    titulo: "Tu primer vistazo (SELECT y FROM) - Ejemplo Guiado",
-    nivel: "basico",
-    esquema: "facil_biblioteca",
-    teoria: "Recuperar todas las columnas o columnas específicas de una tabla base. En SQL, usamos SELECT para indicar qué queremos ver y FROM para indicar de qué tabla.",
-    objetivo: "Bienvenido a SeeQL. Para empezar a explorar, necesitamos ver el catálogo completo de autores que tenemos en nuestra base de datos.",
-    querySolucion: "SELECT * FROM autores;",
-    pistas: [
-      "Usa el asterisco (*) para pedir todas las columnas.",
-      "La tabla que buscas se llama 'autores'.",
-      "Estructura: SELECT * FROM nombre_tabla;"
+    id: 1,
+    titulo: 'SELECT y FROM',
+    concepto: 'Proyección de atributos y selección de relaciones.',
+    fases: [
+      { nivel: 1, dificultad: 'Fácil', esquema: 'Biblioteca', enunciado: 'Muestra todos los autores.', codigoInicial: 'SELECT * FROM autores;', solucionEsperada: 'SELECT * FROM autores;' },
+      { nivel: 2, dificultad: 'Medio', esquema: 'Gimnasio', enunciado: 'Muestra nombre y email de clientes.', solucionEsperada: 'SELECT nombre, email FROM clientes;' },
+      { nivel: 3, dificultad: 'Difícil', esquema: 'Aeropuerto', enunciado: 'Lista modelos, fabricantes y capacidad de aviones.', solucionEsperada: 'SELECT fabricante, nombre_modelo, capacidad_pasajeros FROM modelos_avion;' }
     ]
   },
   {
-    id: "lec-1-2-select-columnas",
-    orden: 2,
-    titulo: "Tu primer vistazo (SELECT y FROM) - Ejercicio 1",
-    nivel: "intermedio",
-    esquema: "medio_gym",
-    teoria: "A menudo no necesitamos toda la información. Podemos sustituir el asterisco (*) por los nombres exactos de las columnas que queremos ver, separados por comas.",
-    objetivo: "Muestra únicamente el nombre completo y el email de todos los clientes registrados en el gimnasio.",
-    querySolucion: "SELECT nombre_completo, email FROM clientes;",
-    pistas: [
-      "Escribe los nombres de las columnas separados por coma: nombre_completo, email.",
-      "La tabla objetivo es 'clientes'.",
-      "Estructura: SELECT col1, col2 FROM nombre_tabla;"
+    id: 2,
+    titulo: 'WHERE',
+    concepto: 'Restricción de tuplas mediante operadores de comparación.',
+    fases: [
+      { nivel: 1, dificultad: 'Fácil', esquema: 'Biblioteca', enunciado: 'Título de los libros que pertenezcan a la categoría 3.', codigoInicial: 'SELECT titulo\nFROM libros\nWHERE id_categoria = 3;', solucionEsperada: 'SELECT titulo FROM libros WHERE id_categoria = 3;' },
+      { nivel: 2, dificultad: 'Medio', esquema: 'Gimnasio', enunciado: 'Todos los datos de los pagos que superen los 50 euros.', solucionEsperada: 'SELECT * FROM pagos WHERE monto > 50.00;' },
+      { nivel: 3, dificultad: 'Difícil', esquema: 'Aeropuerto', enunciado: 'Nombre completo de pasajeros con nacionalidad Británica.', solucionEsperada: "SELECT nombre_completo FROM pasajeros WHERE nacionalidad = 'Británica';" }
     ]
   },
   {
-    id: "lec-1-3-select-avanzado",
-    orden: 3,
-    titulo: "Tu primer vistazo (SELECT y FROM) - Ejercicio 2",
-    nivel: "avanzado",
-    esquema: "dificil_aeropuerto",
-    teoria: "En bases de datos más grandes, seleccionar solo las columnas necesarias es vital para el rendimiento.",
-    objetivo: "Vamos a la base de datos principal. Extrae el fabricante, el nombre del modelo y la capacidad de pasajeros de todos los modelos de avión disponibles.",
-    querySolucion: "SELECT fabricante, nombre_modelo, capacidad_pasajeros FROM modelos_avion;",
-    pistas: [
-      "Necesitas tres columnas: fabricante, nombre_modelo y capacidad_pasajeros.",
-      "La tabla se llama 'modelos_avion'.",
-      "No olvides terminar tu consulta con un punto y coma (;)."
+    id: 3,
+    titulo: 'AND, OR, IN',
+    concepto: 'Combinación de múltiples condiciones lógicas de filtrado.',
+    fases: [
+      { nivel: 1, dificultad: 'Fácil', esquema: 'Biblioteca', enunciado: 'Títulos de libros publicados desde 1900 con más de 1 copia.', solucionEsperada: 'SELECT titulo FROM libros WHERE anio_publicacion >= 1900 AND copias_disponibles > 1;' },
+      { nivel: 2, dificultad: 'Medio', esquema: 'Gimnasio', enunciado: 'Nombre de clases con capacidad de 20 o impartidas por el entrenador 1.', solucionEsperada: 'SELECT nombre_clase FROM clases WHERE capacidad_max = 20 OR id_entrenador = 1;' },
+      { nivel: 3, dificultad: 'Difícil', esquema: 'Aeropuerto', enunciado: 'Número de vuelos que salen desde los aeropuertos 1 o 3.', solucionEsperada: 'SELECT numero_vuelo FROM vuelos WHERE id_aeropuerto_origen IN (1, 3);' }
     ]
   },
   {
-    id: "lec-2-1-where-basico",
-    orden: 4,
-    titulo: "Encontrando la aguja (WHERE básico) - Ejemplo Guiado",
-    nivel: "basico",
-    esquema: "facil_biblioteca",
-    teoria: "Filtrar registros utilizando la cláusula WHERE con operadores de igualdad (=) y comparación matemática sencilla.",
-    objetivo: "Vamos a aprender a filtrar datos. Muestra únicamente el título de los libros que pertenezcan exactamente a la categoría 3.",
-    querySolucion: "SELECT titulo FROM libros WHERE id_categoria = 3;",
-    pistas: [
-      "Pide solo la columna 'titulo' de la tabla 'libros'.",
-      "Añade WHERE al final para establecer la condición.",
-      "La condición es que 'id_categoria' sea igual a 3."
+    id: 4,
+    titulo: 'ORDER BY y LIMIT',
+    concepto: 'Ordenación del conjunto de resultados y restricción de salida.',
+    fases: [
+      { nivel: 1, dificultad: 'Fácil', esquema: 'Biblioteca', enunciado: 'Nombre del autor más antiguo de la base de datos.', solucionEsperada: 'SELECT nombre FROM autores ORDER BY fecha_nacimiento ASC LIMIT 1;' },
+      { nivel: 2, dificultad: 'Medio', esquema: 'Gimnasio', enunciado: 'Nombre y fecha de inscripción de los 3 clientes más recientes.', solucionEsperada: 'SELECT nombre_completo, fecha_inscripcion FROM clientes ORDER BY fecha_inscripcion DESC LIMIT 3;' },
+      { nivel: 3, dificultad: 'Difícil', esquema: 'Aeropuerto', enunciado: 'ID de reserva y precio de las 2 reservas más caras.', solucionEsperada: 'SELECT id_reserva, precio_billete FROM reservas ORDER BY precio_billete DESC LIMIT 2;' }
     ]
   },
   {
-    id: "lec-2-2-where-mayor",
-    orden: 5,
-    titulo: "Encontrando la aguja (WHERE básico) - Ejercicio 1",
-    nivel: "intermedio",
-    esquema: "medio_gym",
-    teoria: "Además del igual (=), puedes usar operadores como mayor que (>), menor que (<), mayor o igual (>=), etc., para campos numéricos.",
-    objetivo: "Aplica el filtro en la tabla de finanzas. Muestra todos los datos de los pagos que superen estrictamente la cantidad de 50 euros.",
-    querySolucion: "SELECT * FROM pagos WHERE monto > 50.00;",
-    pistas: [
-      "Usa SELECT * para traer todos los datos.",
-      "La tabla a consultar es 'pagos'.",
-      "Usa el símbolo mayor que (>) para la columna 'monto'."
+    id: 5,
+    titulo: 'LIKE',
+    concepto: 'Filtrado de cadenas de texto mediante patrones de búsqueda.',
+    fases: [
+      { nivel: 1, dificultad: 'Fácil', esquema: 'Biblioteca', enunciado: "Títulos de libros que empiecen por la palabra 'Harry'.", solucionEsperada: "SELECT titulo FROM libros WHERE titulo LIKE 'Harry%';" },
+      { nivel: 2, dificultad: 'Medio', esquema: 'Gimnasio', enunciado: "Nombre y email de clientes cuyo correo termine en '@gmail.com'.", solucionEsperada: "SELECT nombre_completo, email FROM clientes WHERE email LIKE '%@gmail.com';" },
+      { nivel: 3, dificultad: 'Difícil', esquema: 'Aeropuerto', enunciado: "Fabricante y modelo de aviones cuyo fabricante contenga 'Boeing'.", solucionEsperada: "SELECT fabricante, nombre_modelo FROM modelos_avion WHERE fabricante LIKE '%Boeing%';" }
     ]
   },
   {
-    id: "lec-2-3-where-texto",
-    orden: 6,
-    titulo: "Encontrando la aguja (WHERE básico) - Ejercicio 2",
-    nivel: "avanzado",
-    esquema: "dificil_aeropuerto",
-    teoria: "Cuando filtres por cadenas de texto (VARCHAR), debes envolver el valor a buscar entre comillas simples ('texto').",
-    objetivo: "Filtra registros por texto. Muestra el nombre completo de los pasajeros cuya nacionalidad sea exactamente 'Británica'.",
-    querySolucion: "SELECT nombre_completo FROM pasajeros WHERE nacionalidad = 'Británica';",
-    pistas: [
-      "Selecciona solo 'nombre_completo' de la tabla 'pasajeros'.",
-      "Atención a las comillas: usa comillas simples para 'Británica'.",
-      "Cuidado con las tildes, debe estar escrito exactamente igual."
+    id: 6,
+    titulo: 'SUM, COUNT, AVG',
+    concepto: 'Uso de funciones de agregación para cálculos métricos globales.',
+    fases: [
+      { nivel: 1, dificultad: 'Fácil', esquema: 'Biblioteca', enunciado: 'Cuenta cuántos libros en total hay registrados.', solucionEsperada: 'SELECT COUNT(*) FROM libros;' },
+      { nivel: 2, dificultad: 'Medio', esquema: 'Gimnasio', enunciado: 'Suma total de dinero recaudado en pagos.', solucionEsperada: 'SELECT SUM(monto) FROM pagos;' },
+      { nivel: 3, dificultad: 'Difícil', esquema: 'Aeropuerto', enunciado: 'Capacidad máxima del avión más grande.', solucionEsperada: 'SELECT MAX(capacidad_pasajeros) FROM modelos_avion;' }
     ]
   },
   {
-    id: "lec-3-1-and",
-    orden: 7,
-    titulo: "Exigiendo más (AND, OR, IN) - Ejemplo Guiado",
-    nivel: "basico",
-    esquema: "facil_biblioteca",
-    teoria: "Combinar múltiples condiciones lógicas de filtrado en una misma consulta. Usamos AND cuando queremos que se cumplan todas las condiciones a la vez.",
-    objetivo: "Los filtros pueden combinarse. Necesitamos los títulos de los libros publicados a partir del año 1900 y de los cuales tengamos estrictamente más de 1 copia disponible.",
-    querySolucion: "SELECT titulo FROM libros WHERE anio_publicacion >= 1900 AND copias_disponibles > 1;",
-    pistas: [
-      "Usa el operador >= para 'a partir del año 1900'.",
-      "Une ambas condiciones con la palabra clave AND.",
-      "La segunda condición es copias_disponibles > 1."
+    id: 7,
+    titulo: 'GROUP BY',
+    concepto: 'División de registros en subgrupos lógicos.',
+    fases: [
+      { nivel: 1, dificultad: 'Fácil', esquema: 'Biblioteca', enunciado: 'ID de categoría y cantidad de libros por categoría.', solucionEsperada: 'SELECT id_categoria, COUNT(*) FROM libros GROUP BY id_categoria;' },
+      { nivel: 2, dificultad: 'Medio', esquema: 'Gimnasio', enunciado: 'ID de cada cliente y dinero total que ha gastado.', solucionEsperada: 'SELECT id_cliente, SUM(monto) FROM pagos GROUP BY id_cliente;' },
+      { nivel: 3, dificultad: 'Difícil', esquema: 'Aeropuerto', enunciado: 'ID del aeropuerto de origen y cantidad de vuelos que salen de cada uno.', solucionEsperada: 'SELECT id_aeropuerto_origen, COUNT(*) FROM vuelos GROUP BY id_aeropuerto_origen;' }
     ]
   },
   {
-    id: "lec-3-2-or",
-    orden: 8,
-    titulo: "Exigiendo más (AND, OR, IN) - Ejercicio 1",
-    nivel: "intermedio",
-    esquema: "medio_gym",
-    teoria: "El operador OR permite que una fila sea incluida en el resultado si cumple al menos una de las condiciones.",
-    objetivo: "Muestra el nombre de las clases que tengan una capacidad máxima de 20 personas o que estén impartidas por el entrenador con el ID 1.",
-    querySolucion: "SELECT nombre_clase FROM clases WHERE capacidad_max = 20 OR id_entrenador = 1;",
-    pistas: [
-      "Selecciona 'nombre_clase' de la tabla 'clases'.",
-      "Usa OR para separar las dos opciones válidas.",
-      "Revisa los nombres de las columnas en el esquema visual."
+    id: 8,
+    titulo: 'INNER JOIN',
+    concepto: 'Composición interna de tablas mediante claves foráneas.',
+    fases: [
+      { nivel: 1, dificultad: 'Fácil', esquema: 'Biblioteca', enunciado: 'Título del libro y nombre real de su autor.', solucionEsperada: 'SELECT libros.titulo, autores.nombre FROM libros INNER JOIN autores ON libros.id_autor = autores.id_autor;' },
+      { nivel: 2, dificultad: 'Medio', esquema: 'Gimnasio', enunciado: 'Nombre de cada clase y el nombre del entrenador asignado.', solucionEsperada: 'SELECT clases.nombre_clase, entrenadores.nombre FROM clases INNER JOIN entrenadores ON clases.id_entrenador = entrenadores.id_entrenador;' },
+      { nivel: 3, dificultad: 'Difícil', esquema: 'Aeropuerto', enunciado: 'Identificador de la reserva y nombre de los pasajeros con reserva confirmada.', solucionEsperada: 'SELECT reservas.id_reserva, pasajeros.nombre_completo FROM reservas INNER JOIN pasajeros ON reservas.id_pasajero = pasajeros.id_pasajero;' }
     ]
   },
   {
-    id: "lec-3-3-in",
-    orden: 9,
-    titulo: "Exigiendo más (AND, OR, IN) - Ejercicio 2",
-    nivel: "avanzado",
-    esquema: "dificil_aeropuerto",
-    teoria: "La cláusula IN es un atajo para múltiples OR sobre la misma columna. Permite comprobar si un valor coincide con cualquier elemento de una lista (ej: id IN (1, 2, 3)).",
-    objetivo: "Usa la cláusula IN para buscar coincidencias múltiples. Muestra el número de vuelo de aquellos que salgan desde los aeropuertos con ID 1 o 3.",
-    querySolucion: "SELECT numero_vuelo FROM vuelos WHERE id_aeropuerto_origen IN (1, 3);",
-    pistas: [
-      "La columna de la condición es 'id_aeropuerto_origen'.",
-      "Escribe la lista de valores entre paréntesis: IN (1, 3).",
-      "Solo debes devolver la columna 'numero_vuelo'."
+    id: 9,
+    titulo: 'HAVING',
+    concepto: 'Filtrado de conjuntos de resultados posteriores a una agrupación.',
+    fases: [
+      { nivel: 1, dificultad: 'Fácil', esquema: 'Biblioteca', enunciado: 'ID de la categoría y cantidad de libros, solo para secciones con más de 1 libro.', solucionEsperada: 'SELECT id_categoria, COUNT(*) FROM libros GROUP BY id_categoria HAVING COUNT(*) > 1;' },
+      { nivel: 2, dificultad: 'Medio', esquema: 'Gimnasio', enunciado: 'ID del cliente y suma de sus pagos, solo si han gastado más de 100 euros.', solucionEsperada: 'SELECT id_cliente, SUM(monto) FROM pagos GROUP BY id_cliente HAVING SUM(monto) > 100;' },
+      { nivel: 3, dificultad: 'Difícil', esquema: 'Aeropuerto', enunciado: 'ID del aeropuerto y cantidad de vuelos, solo si operan más de 2 vuelos de salida.', solucionEsperada: 'SELECT id_aeropuerto_origen, COUNT(*) FROM vuelos GROUP BY id_aeropuerto_origen HAVING COUNT(*) > 2;' }
     ]
   },
   {
-    id: "lec-4-1-order-limit",
-    orden: 10,
-    titulo: "Orden y Top (ORDER BY y LIMIT) - Ejemplo Guiado",
-    nivel: "basico",
-    esquema: "facil_biblioteca",
-    teoria: "Organizar el conjunto de resultados de forma ascendente (ASC) o descendente (DESC) y restringir la cantidad de filas devueltas (LIMIT).",
-    objetivo: "Vamos a organizar la información. Encuentra el nombre del autor más antiguo de nuestra base de datos (mostrando únicamente a una persona, ordenada por su fecha de nacimiento).",
-    querySolucion: "SELECT nombre FROM autores ORDER BY fecha_nacimiento ASC LIMIT 1;",
-    pistas: [
-      "Para que sea el más antiguo, ordena por 'fecha_nacimiento' de forma ascendente (ASC).",
-      "ORDER BY se coloca siempre después del WHERE (si lo hubiera).",
-      "Añade LIMIT 1 al final para quedarte solo con la primera fila."
-    ]
-  },
-  {
-    id: "lec-4-2-order-desc",
-    orden: 11,
-    titulo: "Orden y Top (ORDER BY y LIMIT) - Ejercicio 1",
-    nivel: "intermedio",
-    esquema: "medio_gym",
-    teoria: "Ordenando de forma descendente (DESC) podemos obtener rápidamente los valores más altos o más recientes de una tabla.",
-    objetivo: "Queremos felicitar a las nuevas incorporaciones. Muestra el nombre completo y la fecha de inscripción de los 3 clientes más recientes.",
-    querySolucion: "SELECT nombre_completo, fecha_inscripcion FROM clientes ORDER BY fecha_inscripcion DESC LIMIT 3;",
-    pistas: [
-      "Selecciona las dos columnas pedidas de la tabla 'clientes'.",
-      "Los clientes recientes tienen una fecha mayor, usa DESC.",
-      "Añade LIMIT 3 al final del todo."
-    ]
-  },
-  {
-    id: "lec-4-3-order-top",
-    orden: 12,
-    titulo: "Orden y Top (ORDER BY y LIMIT) - Ejercicio 2",
-    nivel: "avanzado",
-    esquema: "dificil_aeropuerto",
-    teoria: "La combinación de ORDER BY DESC y LIMIT es el patrón estándar en bases de datos para extraer los clásicos 'Top 10', 'Top 5', etc.",
-    objetivo: "Revisa las transacciones VIP. Muestra el ID de reserva y el precio del billete de las 2 reservas más caras del sistema.",
-    querySolucion: "SELECT id_reserva, precio_billete FROM reservas ORDER BY precio_billete DESC LIMIT 2;",
-    pistas: [
-      "La tabla a consultar es 'reservas'.",
-      "Ordena por la columna monetaria 'precio_billete' hacia abajo (DESC).",
-      "Recorta el resultado a 2 filas con LIMIT."
+    id: 10,
+    titulo: 'LEFT JOIN',
+    concepto: 'Composición externa conservando los registros de la relación principal.',
+    fases: [
+      { nivel: 1, dificultad: 'Fácil', esquema: 'Biblioteca', enunciado: 'Nombre de todos los usuarios y el ID de sus préstamos (incluso sin préstamos).', solucionEsperada: 'SELECT usuarios.nombre_completo, prestamos.id_prestamo FROM usuarios LEFT JOIN prestamos ON usuarios.id_usuario = prestamos.id_usuario;' },
+      { nivel: 2, dificultad: 'Medio', esquema: 'Gimnasio', enunciado: 'Nombre de todas las clases y su entrenador (incluyendo clases sin entrenador).', solucionEsperada: 'SELECT clases.nombre_clase, entrenadores.nombre FROM clases LEFT JOIN entrenadores ON clases.id_entrenador = entrenadores.id_entrenador;' },
+      { nivel: 3, dificultad: 'Difícil', esquema: 'Aeropuerto', enunciado: 'Nombre del modelo de avión y número de vuelo (incluso sin vuelos programados).', solucionEsperada: 'SELECT modelos_avion.nombre_modelo, vuelos.numero_vuelo FROM modelos_avion LEFT JOIN vuelos ON modelos_avion.id_modelo = vuelos.id_modelo_avion;' }
     ]
   }
 ];

@@ -14,6 +14,12 @@ export interface SelectedColumn {
   column: string;
 }
 
+// NUEVA INTERFAZ PARA ORDER BY
+export interface OrderByDetails {
+  column: string;
+  direction: 'ASC' | 'DESC';
+}
+
 const resolveColumn = (row: any, column: string, table?: string) => {
   if (table) return row[`${table}.${column}`];
 
@@ -71,6 +77,9 @@ export const useSqlVisualizer = (query: string) => {
   const [selectedColumns, setSelectedColumns] = useState<SelectedColumn[]>([]);
   const [isSelectAll, setIsSelectAll] = useState<boolean>(false);
 
+  // NUEVO ESTADO PARA ORDER BY
+  const [orderBy, setOrderBy] = useState<OrderByDetails | null>(null);
+
   useEffect(() => {
     const cleanQuery = query.trim().replace(/;+$/, '');
 
@@ -80,6 +89,7 @@ export const useSqlVisualizer = (query: string) => {
       setJoinDetails(null);
       setSelectedColumns([]);
       setIsSelectAll(true);
+      setOrderBy(null);
       return;
     }
 
@@ -136,6 +146,16 @@ export const useSqlVisualizer = (query: string) => {
       parsedJoin = { type: joinType, leftTable: currentMainTable, rightTable, leftColumn: lCol, rightColumn: rCol };
     }
 
+    // NUEVO: PARSEAR ORDER BY
+    const orderByMatch = cleanQuery.match(/ORDER\s+BY\s+([a-zA-Z0-9_.]+)(?:\s+(ASC|DESC))?/i);
+    let parsedOrderBy: OrderByDetails | null = null;
+    if (orderByMatch) {
+      parsedOrderBy = {
+        column: orderByMatch[1],
+        direction: (orderByMatch[2]?.toUpperCase() as 'ASC' | 'DESC') || 'ASC' // Por defecto ASC
+      };
+    }
+
     try {
       const parser = new Parser();
       const ast = parser.astify(cleanQuery);
@@ -152,7 +172,9 @@ export const useSqlVisualizer = (query: string) => {
     setSelectedColumns(parsedSelectedCols);
     setIsSelectAll(isAll);
     setJoinDetails(parsedJoin);
+    setOrderBy(parsedOrderBy); // Guardamos en el estado
   }, [query]);
 
-  return { activeTables, whereAST, joinDetails, selectedColumns, isSelectAll };
+  // Exportamos el nuevo parámetro
+  return { activeTables, whereAST, joinDetails, selectedColumns, isSelectAll, orderBy };
 };

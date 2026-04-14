@@ -1,19 +1,19 @@
 import Editor from '@monaco-editor/react';
 
-interface Props {
-  codigo: string;
-  setCodigo: (nuevoCodigo: string) => void;
+export interface Props {
+  value?: string;
+  onChange?: (value: string | undefined) => void;
 }
 
-export const SqlEditor = ({ codigo, setCodigo }: Props) => {
+export const SqlEditor = ({ value, onChange }: Props) => {
   return (
     <div className="flex-1 h-full overflow-hidden border border-slate-700 rounded-lg shadow-2xl">
       <Editor
         height="100%"
         defaultLanguage="sql"
         theme="vs-dark"
-        value={codigo}
-        onChange={(valor) => setCodigo(valor || "")}
+        value={value}
+        onChange={onChange}
         options={{
           minimap: { enabled: false },
           fontSize: 16,
