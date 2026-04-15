@@ -1,9 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-// CORRECCIÓN 1: Añadido "type" para cumplir con la sintaxis estricta
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
-// CORRECCIÓN 2: Definimos las interfaces directamente aquí
 export interface SignInData {
   email: string;
   password: string;
@@ -76,9 +74,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-[#050a15] flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-    </div>;
+    return (
+      <div className="min-h-screen bg-[#050a15] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
   return (
