@@ -14,14 +14,20 @@ export interface SelectedColumn {
   column: string;
 }
 
-// NUEVA INTERFAZ PARA ORDER BY
 export interface OrderByDetails {
   column: string;
   direction: 'ASC' | 'DESC';
 }
 
+export interface Aggregation {
+  func: string;
+  column: string;
+  raw: string;
+}
+
 const resolveColumn = (row: any, column: string, table?: string) => {
   if (table) return row[`${table}.${column}`];
+  if (row[column] !== undefined) return row[column];
 
   const matches = Object.keys(row).filter(k =>
     k.toLowerCase().endsWith(`.${column.toLowerCase()}`) || k.toLowerCase() === column.toLowerCase()
@@ -34,22 +40,24 @@ const resolveColumn = (row: any, column: string, table?: string) => {
 export const evaluateWhere = (row: any, ast: any): boolean => {
   if (!ast) return true;
 
+  const resolveNode = (node: any) => {
+    if (!node) return undefined;
+    if (node.type === 'column_ref') {
+      return resolveColumn(row, node.column, node.table);
+    } else if (node.type === 'aggr_func') {
+      const funcName = node.name.toUpperCase();
+      const colName = node.args && node.args.expr ? (node.args.expr.type === 'star' ? '*' : node.args.expr.column) : '*';
+      return resolveColumn(row, `${funcName}(${colName})`);
+    } else {
+      return node.value;
+    }
+  };
+
   if (ast.type === 'binary_expr') {
-    let leftValue;
-    if (ast.left.type === 'column_ref') {
-      leftValue = resolveColumn(row, ast.left.column, ast.left.table);
-    } else {
-      leftValue = ast.left.value;
-    }
-
-    let rightValue;
-    if (ast.right.type === 'column_ref') {
-      rightValue = resolveColumn(row, ast.right.column, ast.right.table);
-    } else {
-      rightValue = ast.right.value;
-    }
-
+    const leftValue = resolveNode(ast.left);
+    const rightValue = resolveNode(ast.right);
     const op = ast.operator;
+
     if (leftValue === undefined || rightValue === undefined) return true;
 
     switch (op) {
@@ -76,20 +84,21 @@ export const useSqlVisualizer = (query: string) => {
   const [joinDetails, setJoinDetails] = useState<JoinDetails | null>(null);
   const [selectedColumns, setSelectedColumns] = useState<SelectedColumn[]>([]);
   const [isSelectAll, setIsSelectAll] = useState<boolean>(false);
-
-  // NUEVO ESTADO PARA ORDER BY
   const [orderBy, setOrderBy] = useState<OrderByDetails | null>(null);
+  const [groupBy, setGroupBy] = useState<string[]>([]);
+  const [aggregations, setAggregations] = useState<Aggregation[]>([]);
+  const [havingAST, setHavingAST] = useState<any>(null);
+
+  // NUEVO ESTADO PARA LIMIT
+  const [limit, setLimit] = useState<number | null>(null);
 
   useEffect(() => {
     const cleanQuery = query.trim().replace(/;+$/, '');
 
     if (!cleanQuery) {
-      setActiveTables([]);
-      setWhereAST(null);
-      setJoinDetails(null);
-      setSelectedColumns([]);
-      setIsSelectAll(true);
-      setOrderBy(null);
+      setActiveTables([]); setWhereAST(null); setJoinDetails(null);
+      setSelectedColumns([]); setIsSelectAll(true); setOrderBy(null);
+      setGroupBy([]); setAggregations([]); setHavingAST(null); setLimit(null);
       return;
     }
 
@@ -112,49 +121,65 @@ export const useSqlVisualizer = (query: string) => {
     }
 
     const selectMatch = cleanQuery.match(/SELECT\s+([\s\S]*?)(?:\s+FROM|$)/i);
+    let parsedAggregations: Aggregation[] = [];
     if (selectMatch && currentMainTable) {
       const colString = selectMatch[1].trim();
-      if (colString === '*' || colString.includes('.*')) {
-        isAll = true;
-      } else {
+      if (colString === '*' || colString.includes('.*')) isAll = true;
+      else {
         const cols = colString.split(',').map(c => c.trim()).filter(Boolean);
         cols.forEach(c => {
           const colClean = c.split(/\s+AS\s+/i)[0].trim().replace(/[\r\n]+/g, '').replace(/\s+/g, ' ');
-          if (colClean === '*') {
-            isAll = true;
-          } else {
+          if (colClean === '*') isAll = true;
+          else {
             const parts = colClean.split('.');
-            if (parts.length === 2) {
-              parsedSelectedCols.push({ table: parts[0], column: parts[1] });
-            } else if (parts.length === 1) {
-              parsedSelectedCols.push({ table: null, column: parts[0] });
-            }
+            if (parts.length === 2) parsedSelectedCols.push({ table: parts[0], column: parts[1] });
+            else if (parts.length === 1) parsedSelectedCols.push({ table: null, column: parts[0] });
           }
         });
+
+        const aggrRegex = /(COUNT|SUM|AVG|MAX|MIN)\s*\(\s*([a-zA-Z0-9_.*]+)\s*\)/gi;
+        let match;
+        while ((match = aggrRegex.exec(colString)) !== null) {
+             const colName = match[2].split('.')[1] || match[2];
+             parsedAggregations.push({
+                 func: match[1].toUpperCase(),
+                 column: colName,
+                 raw: `${match[1].toUpperCase()}(${match[2]})`
+             });
+        }
       }
     }
 
     const joinConditionRegex = /(LEFT\s+JOIN|INNER\s+JOIN|JOIN)\s+([a-zA-Z0-9_]+)\s+ON\s+([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)\s*=\s*([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/i;
     const jm = cleanQuery.match(joinConditionRegex);
-
     if (jm && currentMainTable) {
       const joinType = jm[1].toUpperCase().includes('LEFT') ? 'LEFT JOIN' : 'INNER JOIN';
       const rightTable = jm[2];
       const lCol = jm[3].toLowerCase() === currentMainTable.toLowerCase() ? jm[4] : jm[6];
       const rCol = jm[3].toLowerCase() === currentMainTable.toLowerCase() ? jm[6] : jm[4];
-
       parsedJoin = { type: joinType, leftTable: currentMainTable, rightTable, leftColumn: lCol, rightColumn: rCol };
     }
 
-    // NUEVO: PARSEAR ORDER BY
     const orderByMatch = cleanQuery.match(/ORDER\s+BY\s+([a-zA-Z0-9_.]+)(?:\s+(ASC|DESC))?/i);
     let parsedOrderBy: OrderByDetails | null = null;
     if (orderByMatch) {
-      parsedOrderBy = {
-        column: orderByMatch[1],
-        direction: (orderByMatch[2]?.toUpperCase() as 'ASC' | 'DESC') || 'ASC' // Por defecto ASC
-      };
+      parsedOrderBy = { column: orderByMatch[1], direction: (orderByMatch[2]?.toUpperCase() as 'ASC' | 'DESC') || 'ASC' };
     }
+
+    let parsedGroupBy: string[] = [];
+    const groupByMatch = cleanQuery.match(/GROUP\s+BY\s+([a-zA-Z0-9_.,\s]+)(?:\s+HAVING|\s+ORDER|\s+LIMIT|$)/i);
+    if (groupByMatch) {
+       parsedGroupBy = groupByMatch[1].split(',').map(s => s.trim().split('.')[1] || s.trim());
+    }
+
+    // NUEVO: PARSEAR LIMIT
+    const limitMatch = cleanQuery.match(/LIMIT\s+(\d+)/i);
+    let parsedLimit: number | null = null;
+    if (limitMatch) {
+      parsedLimit = parseInt(limitMatch[1], 10);
+    }
+
+    let parsedHavingAST: any = null;
 
     try {
       const parser = new Parser();
@@ -164,17 +189,16 @@ export const useSqlVisualizer = (query: string) => {
         if (stmt.type === 'select') {
           if (stmt.where) setWhereAST(stmt.where);
           if (stmt.columns === '*') isAll = true;
+          if (stmt.having) parsedHavingAST = stmt.having;
         }
       });
     } catch (e) {}
 
-    setActiveTables(parsedTables);
-    setSelectedColumns(parsedSelectedCols);
-    setIsSelectAll(isAll);
-    setJoinDetails(parsedJoin);
-    setOrderBy(parsedOrderBy); // Guardamos en el estado
+    setActiveTables(parsedTables); setSelectedColumns(parsedSelectedCols);
+    setIsSelectAll(isAll); setJoinDetails(parsedJoin); setOrderBy(parsedOrderBy);
+    setGroupBy(parsedGroupBy); setAggregations(parsedAggregations); setHavingAST(parsedHavingAST);
+    setLimit(parsedLimit); // Guardamos el limit en el estado
   }, [query]);
 
-  // Exportamos el nuevo parámetro
-  return { activeTables, whereAST, joinDetails, selectedColumns, isSelectAll, orderBy };
+  return { activeTables, whereAST, joinDetails, selectedColumns, isSelectAll, orderBy, groupBy, aggregations, havingAST, limit };
 };

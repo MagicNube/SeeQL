@@ -160,6 +160,7 @@ export const PizarraInteractiva = ({ estructura, relaciones }: { estructura: any
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
+        panActivationKeyCode={null}
         colorMode="dark"
         proOptions={{ hideAttribution: true }}
         className="bg-[#0f172a] [&_.react-flow__attribution]:hidden"
