@@ -1,29 +1,77 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Navbar } from './components/layout/Navbar';
-import { Home } from './pages/Home';
-import Sandbox from './pages/Sandbox';
-import Lecciones from './pages/Lecciones';
-import { Login } from './pages/Login';
-import { Register } from './pages/Register';
-import { Landing } from './pages/Landing';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { Sandbox } from './pages/Sandbox';
 import { Dashboard } from './pages/Dashboard';
+import Lecciones from './pages/Lecciones';
+import { Landing } from './pages/Landing';
+import { Navbar } from './components/layout/Navbar';
 
-function App() {
+// Componente para proteger rutas privadas (Lecciones)
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  // Si no hay sesión, mandamos al usuario a la Landing para que se identifique
+  if (!user) return <Navigate to="/" replace />;
+  return <>{children}</>;
+};
+
+// Componente para la Landing: si ya estás logueado, te lleva al Dashboard directamente
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  if (user) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+};
+
+export default function App() {
   return (
-    <BrowserRouter>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/sandbox" element={<Sandbox />} />
-        <Route path="/lecciones" element={<Lecciones />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="*" element={<h1 className="text-4xl font-bold text-center mt-20">404 - Página no encontrada</h1>} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        {/* Contenedor global con el color de fondo correcto del tema */}
+        <div className="min-h-screen bg-slate-900 text-white flex flex-col font-sans">
+          <Navbar />
+          <main className="flex-1 flex flex-col">
+            <Routes>
+              {/* Entrada principal: gestiona Login/Register visualmente */}
+              <Route
+                path="/"
+                element={
+                  <PublicRoute>
+                    <Landing />
+                  </PublicRoute>
+                }
+              />
+
+              {/* Redirecciones automáticas para mantener compatibilidad con enlaces del Navbar */}
+              <Route path="/login" element={<Navigate to="/" replace />} />
+              <Route path="/register" element={<Navigate to="/" replace />} />
+
+              {/* Rutas de acceso libre (Invitados) */}
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/sandbox" element={<Sandbox />} />
+
+              {/* Rutas de aprendizaje (Solo alumnos registrados) */}
+              <Route
+                path="/lecciones"
+                element={
+                  <ProtectedRoute>
+                    <Lecciones />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/lecciones/:id"
+                element={
+                  <ProtectedRoute>
+                    <Lecciones />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* En caso de ruta no encontrada, volvemos al inicio */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+        </div>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
-
-export default App;

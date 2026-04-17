@@ -1,11 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LECCIONES } from '../data/lecciones';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 import { Lock, Play, CheckCircle2, Database } from 'lucide-react';
 
 export default function Lecciones() {
   const navigate = useNavigate();
-  const [nivelActual] = useState<number>(1);
+  const { user } = useAuth();
+  const [leccionesCompletadas, setLeccionesCompletadas] = useState<number[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchProgreso();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
+  const fetchProgreso = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('progreso_usuarios')
+        .select('lesson_id')
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      if (data) {
+        setLeccionesCompletadas(data.map(fila => fila.lesson_id));
+      }
+    } catch (error) {
+      console.error('Error al cargar el progreso:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const nivelActual = leccionesCompletadas.length > 0
+    ? Math.max(...leccionesCompletadas) + 1
+    : 1;
 
   const handleComenzarLeccion = (id: number) => {
     if (id <= nivelActual) {
@@ -13,13 +48,19 @@ export default function Lecciones() {
     }
   };
 
-  const progresoPorcentaje = Math.round(((nivelActual - 1) / LECCIONES.length) * 100);
+  const progresoPorcentaje = Math.round((leccionesCompletadas.length / LECCIONES.length) * 100);
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center py-32">
+        <div className="text-cyan-400 animate-pulse text-xl font-bold">Cargando itinerario...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col font-sans">
+    <div className="flex-1 flex flex-col font-sans w-full">
       <main className="flex-1 p-8 text-white max-w-7xl mx-auto w-full">
-
-        {/* Cabecera y Barra de Progreso */}
         <div className="mb-10 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
           <div className="flex justify-between items-end mb-4">
             <div>
@@ -38,10 +79,14 @@ export default function Lecciones() {
           </div>
         </div>
 
-        {/* Cuadrícula de niveles */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {LECCIONES.map((leccion) => {
-            const estado = leccion.id < nivelActual ? 'completada' : leccion.id === nivelActual ? 'disponible' : 'bloqueada';
+            const estado = leccionesCompletadas.includes(leccion.id)
+              ? 'completada'
+              : leccion.id === nivelActual
+                ? 'disponible'
+                : 'bloqueada';
+
             return (
               <div key={leccion.id} onClick={() => handleComenzarLeccion(leccion.id)}
                 className={`relative flex flex-col rounded-xl border p-5 transition-all duration-300 ${

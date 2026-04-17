@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Loader2 } from 'lucide-react';
+import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const Login = () => {
@@ -9,14 +9,19 @@ export const Login = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
 
+  // Estado para capturar errores de login
+  const [error, setError] = useState<string | null>(null);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setLoading(true);
     try {
       await signIn(formData);
       navigate('/dashboard');
-    } catch (error) {
-      console.error('Error al iniciar sesión:', error);
+    } catch (err: any) {
+      // Si Supabase devuelve error, lo mostramos
+      setError(err.message === 'Invalid login credentials' ? 'Correo o contraseña incorrectos' : err.message);
     } finally {
       setLoading(false);
     }
@@ -37,13 +42,21 @@ export const Login = () => {
     } catch (error) {
       console.error('Error al desloguear invitado:', error);
     } finally {
-      navigate('/dashboard');
+      navigate('/sandbox');
     }
   };
 
   return (
     <div className="w-full max-w-sm mx-auto">
       <form onSubmit={handleLogin} className="flex flex-col gap-4">
+        {/* MENSAJE DE ERROR VISIBLE */}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-3 flex items-center gap-3 text-red-400 text-xs font-bold">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <p>{error}</p>
+          </div>
+        )}
+
         <div className="relative">
           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input
@@ -91,7 +104,6 @@ export const Login = () => {
           Google
         </button>
         <button
-          type="button"
           onClick={handleGuest}
           className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none"
         >

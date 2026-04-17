@@ -16,7 +16,7 @@ const QUERIES_POR_DEFECTO: Record<EsquemaId, string> = {
   dificil_aeropuerto: "SELECT numero_vuelo, hora_salida\nFROM vuelos\nWHERE id_aeropuerto_origen = 1"
 };
 
-export default function Sandbox() {
+export function Sandbox() {
   const esquemas: { id: EsquemaId; nombre: string }[] = [
     { id: 'facil_biblioteca', nombre: 'Biblioteca (Fácil)' },
     { id: 'medio_gym', nombre: 'Gimnasio (Medio)' },

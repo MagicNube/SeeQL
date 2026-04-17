@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export const Register = () => {
-  const navigate = useNavigate();
+// 1. Añadimos la interfaz para las propiedades
+interface RegisterProps {
+  onSuccess: () => void;
+}
+
+// 2. Recibimos onSuccess por parámetros
+export const Register = ({ onSuccess }: RegisterProps) => {
   const { signUp, signInWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
@@ -26,10 +30,13 @@ export const Register = () => {
         password: formData.password,
         fullName: formData.name
       });
-      // MENSAJITO VERDE
-      setMessage({ type: 'success', text: '¡Registrado con éxito! Revisa tu correo para confirmar.' });
-      // VACIAMOS LOS CAMPOS AQUÍ
+
+      // Limpiamos los campos
       setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+
+      // 3. Avisamos a Landing de que todo ha ido bien
+      onSuccess();
+
     } catch (error: any) {
       setMessage({ type: 'error', text: error.message || 'Error en el registro.' });
     } finally {
@@ -48,8 +55,8 @@ export const Register = () => {
   return (
     <div className="w-full max-w-sm mx-auto">
       <form onSubmit={handleRegister} className="flex flex-col gap-4">
-        {message && (
-          <div className={`p-3 rounded-xl text-xs font-bold ${message.type === 'success' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+        {message && message.type === 'error' && (
+          <div className="p-3 rounded-xl text-xs font-bold bg-red-500/10 text-red-500 border border-red-500/20">
             {message.text}
           </div>
         )}
