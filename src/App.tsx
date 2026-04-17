@@ -5,6 +5,7 @@ import { Dashboard } from './pages/Dashboard';
 import Lecciones from './pages/Lecciones';
 import { Landing } from './pages/Landing';
 import { Navbar } from './components/layout/Navbar';
+import { SobreMi } from './pages/SobreMi';
 
 // Componente para proteger rutas privadas (Lecciones)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -47,6 +48,7 @@ export default function App() {
               {/* Rutas de acceso libre (Invitados) */}
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/sandbox" element={<Sandbox />} />
+              <Route path="/sobre-mi" element={<SobreMi />} />
 
               {/* Rutas de aprendizaje (Solo alumnos registrados) */}
               <Route

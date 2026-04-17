@@ -43,10 +43,15 @@ export const Navbar = () => {
               <LayoutDashboard className="w-4 h-4" />
               Dashboard
             </Link>
-            <a href="#" className="flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-blue-400 transition-colors">
+
+            <Link
+              to="/sobre-mi"
+              className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${location.pathname === '/sobre-mi' ? 'text-blue-400' : 'text-slate-400 hover:text-white'}`}
+            >
               <Info className="w-4 h-4" />
               Sobre mí
-            </a>
+            </Link>
+
             <a
               href="https://github.com/MagicNube/SeeQL"
               target="_blank"
