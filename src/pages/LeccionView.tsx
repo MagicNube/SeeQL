@@ -7,6 +7,7 @@ import { DatosPreview } from '../components/DatosPreview';
 import { PizarraInteractiva } from '../components/PizarraInteractiva';
 import { LECCIONES } from '../data/lecciones';
 import { useAuth } from '../context/AuthContext';
+import { traducirErrorSQL } from '../utils/traductorSQL';
 import {
   Target,
   Lightbulb,
@@ -210,7 +211,8 @@ export function LeccionView() {
         setIsSuccess(false);
       }
     } catch (err: any) {
-      setMensajeConsola(err.message || 'Error de sintaxis SQL');
+      const mensajeAmigable = traducirErrorSQL(err.message || '');
+      setMensajeConsola(mensajeAmigable);
       setIsSuccess(false);
     }
   };

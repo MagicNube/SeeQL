@@ -82,13 +82,6 @@ export const Landing = () => {
                 <UserCircle className="w-4 h-4" />
                 Continuar como invitado
               </button>
-
-              <button
-                onClick={() => setShowSuccessPopup(true)}
-                className="text-[10px] text-slate-600 hover:text-slate-400 transition-colors uppercase tracking-widest cursor-pointer"
-              >
-                [Dev] Ver Popup
-              </button>
             </div>
           </div>
         </div>

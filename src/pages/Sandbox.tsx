@@ -4,6 +4,7 @@ import { SqlEditor } from '../components/editor/SqlEditor';
 import { DatosPreview } from '../components/DatosPreview';
 import { PizarraInteractiva } from '../components/PizarraInteractiva';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { traducirErrorSQL } from '../utils/traductorSQL';
 
 type EsquemaId = 'facil_biblioteca' | 'medio_gym' | 'dificil_aeropuerto';
 type ColumnaDef = { name: string; type: string; isPk?: boolean; };
@@ -129,7 +130,11 @@ export function Sandbox() {
       setColumnasQuery(filas.length > 0 ? Object.keys(filas[0]) : []);
       setConsoleLog({ status: 'success', message: `Query ejecutada con éxito. Filas devueltas: ${filas.length}.`, timestamp: time });
     } catch (err: any) {
-      setConsoleLog({ status: 'error', message: err.message || String(err), timestamp: time });
+      // Pasamos el error crudo por nuestro traductor mágico
+      const mensajeOriginal = err.message || String(err);
+      const mensajeAmigable = traducirErrorSQL(mensajeOriginal);
+
+      setConsoleLog({ status: 'error', message: mensajeAmigable, timestamp: time });
       setResultadosQuery([]); setColumnasQuery([]);
     } finally {
       setLoadingOutput(false);
