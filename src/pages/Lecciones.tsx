@@ -64,7 +64,7 @@ export default function Lecciones() {
         <div className="mb-10 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
           <div className="flex justify-between items-end mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
+              <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-cyan-300">
                 Itinerario SQL
               </h1>
               <p className="text-slate-400 mt-2">Domina el álgebra relacional paso a paso.</p>
@@ -75,7 +75,7 @@ export default function Lecciones() {
             </div>
           </div>
           <div className="w-full bg-slate-700 rounded-full h-2.5">
-            <div className="bg-gradient-to-r from-blue-500 to-cyan-400 h-2.5 rounded-full transition-all duration-500" style={{ width: `${progresoPorcentaje}%` }}></div>
+            <div className="bg-linear-to-r from-blue-500 to-cyan-400 h-2.5 rounded-full transition-all duration-500" style={{ width: `${progresoPorcentaje}%` }}></div>
           </div>
         </div>
 
@@ -111,7 +111,7 @@ export default function Lecciones() {
                 <div className="mt-6 pt-4 border-t border-slate-700/50 flex items-center justify-between">
                   <div className="flex items-center space-x-1">
                     <Database className="w-4 h-4 text-slate-500 mr-1" />
-                    <span className="text-xs text-slate-400">3 Fases</span>
+                    <span className="text-xs text-slate-400">3 Ejercicios</span>
                   </div>
                 </div>
               </div>
