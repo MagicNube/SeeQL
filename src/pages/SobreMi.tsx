@@ -1,4 +1,4 @@
-import { Github, Mail, ExternalLink, Code2, Terminal, Cpu } from 'lucide-react';
+import { Github, Mail, Terminal } from 'lucide-react';
 
 export const SobreMi = () => {
   return (
@@ -11,8 +11,8 @@ export const SobreMi = () => {
       <div className="max-w-3xl w-full z-10">
         <div className="bg-slate-800/40 backdrop-blur-2xl border border-slate-700/50 rounded-4xl overflow-hidden shadow-2xl">
 
-          {/* Header del Perfil */}
-          <div className="relative h-32 bg-gradient-to-r from-blue-600 to-cyan-500">
+          {/* Header del Perfil - Corregido el bg-linear-to-r */}
+          <div className="relative h-32 bg-linear-to-r from-blue-600 to-cyan-500">
             <div className="absolute -bottom-12 left-8">
               <div className="w-24 h-24 rounded-3xl bg-slate-900 border-4 border-slate-800 flex items-center justify-center shadow-xl">
                 <Terminal className="w-12 h-12 text-blue-400" />
