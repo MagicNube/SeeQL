@@ -62,6 +62,30 @@ export function LeccionView() {
 
   const [showOnboarding, setShowOnboarding] = useState(false);
 
+  // 1. Efecto de seguridad (Debe ser el primero)
+  useEffect(() => {
+    const verificarAcceso = async () => {
+      if (!leccion) {
+        navigate('/lecciones');
+        return;
+      }
+      if (leccionId === 1 || !user) return;
+
+      const { data } = await supabase
+        .from('progreso_usuarios')
+        .select('lesson_id')
+        .eq('user_id', user.id);
+
+      const leccionesCompletadas = data ? data.map(p => p.lesson_id) : [];
+
+      if (!leccionesCompletadas.includes(leccionId - 1)) {
+        navigate('/lecciones');
+      }
+    };
+
+    verificarAcceso();
+  }, [leccionId, user, navigate, leccion]);
+
   useEffect(() => {
     if (leccionId === 1 && ejercicioActualIdx === 0) {
       const hasSeenOnboarding = localStorage.getItem('seeql_onboarding_seen');

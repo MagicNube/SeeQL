@@ -7,6 +7,7 @@ import { Landing } from './pages/Landing';
 import { Navbar } from './components/layout/Navbar';
 import { SobreMi } from './pages/SobreMi';
 import {LeccionView} from './pages/LeccionView.tsx';
+import { NotFound } from './pages/NotFound';
 
 // Componente para proteger rutas privadas (Lecciones)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -70,8 +71,7 @@ export default function App() {
               />
 
               {/* En caso de ruta no encontrada, volvemos al inicio */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <Route path="*" element={<NotFound />} />            </Routes>
           </main>
         </div>
       </BrowserRouter>
