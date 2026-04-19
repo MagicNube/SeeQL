@@ -232,7 +232,8 @@ export const LECCIONES: Leccion[] = [
         enunciado: 'Muestra el ID de categoría y cuántos libros hay asociados a cada una.',
         teoria: '`GROUP BY` agrupa filas que tienen los mismos valores. Se suele usar junto a funciones como `COUNT` o `SUM` para obtener totales por grupo.',
         pista: '¡Simplemente ejecuta, ya está resuelto!',
-        solucionEsperada: 'SELECT id_categoria, COUNT(*) FROM libros GROUP BY id_categoria'
+        solucionEsperada: 'SELECT id_categoria, COUNT(*) FROM libros GROUP BY id_categoria',
+        codigoInicial: 'SELECT id_categoria, COUNT(*)\nFROM libros\nGROUP BY id_categoria'
       },
       {
         nivel: 2,
@@ -264,7 +265,8 @@ export const LECCIONES: Leccion[] = [
         enunciado: 'Muestra el título de cada libro junto al nombre real de su autor.',
         teoria: '`JOIN` une dos tablas. El `INNER JOIN` solo muestra los registros que tienen una coincidencia en ambas tablas mediante una clave común.',
         pista: '¡Simplemente ejecuta, ya está resuelto!',
-        solucionEsperada: 'SELECT libros.titulo, autores.nombre FROM libros INNER JOIN autores ON libros.id_autor = autores.id_autor'
+        solucionEsperada: 'SELECT libros.titulo, autores.nombre FROM libros INNER JOIN autores ON libros.id_autor = autores.id_autor',
+        codigoInicial: 'SELECT libros.titulo, autores.nombre\nFROM libros\nINNER JOIN autores\nON libros.id_autor = autores.id_autor'
       },
       {
         nivel: 2,
@@ -296,7 +298,8 @@ export const LECCIONES: Leccion[] = [
         enunciado: 'Muestra el ID de categoría y cantidad de libros, pero solo para aquellas que tengan más de 1 libro.',
         teoria: '`HAVING` es el "WHERE" de los grupos. Se usa después de un `GROUP BY` para filtrar grupos que cumplen una condición estadística.',
         pista: '¡Simplemente ejecuta, ya está resuelto!',
-        solucionEsperada: 'SELECT id_categoria, COUNT(*) FROM libros GROUP BY id_categoria HAVING COUNT(*) > 1'
+        solucionEsperada: 'SELECT id_categoria, COUNT(*) FROM libros GROUP BY id_categoria HAVING COUNT(*) > 1',
+        codigoInicial: 'SELECT id_categoria, COUNT(*)\nFROM libros\nGROUP BY id_categoria\nHAVING COUNT(*) > 1'
       },
       {
         nivel: 2,
@@ -328,7 +331,8 @@ export const LECCIONES: Leccion[] = [
         enunciado: 'Nombre de todos los usuarios y el ID de sus préstamos (deben aparecer incluso si nunca han pedido un libro).',
         teoria: 'El `LEFT JOIN` devuelve todas las filas de la tabla de la izquierda, y las filas coincidentes de la derecha. Si no hay coincidencia, devuelve NULL.',
         pista: '¡Simplemente ejecuta, ya está resuelto!',
-        solucionEsperada: 'SELECT usuarios.nombre_completo, prestamos.id_prestamo FROM usuarios LEFT JOIN prestamos ON usuarios.id_usuario = prestamos.id_usuario'
+        solucionEsperada: 'SELECT usuarios.nombre_completo, prestamos.id_prestamo FROM usuarios LEFT JOIN prestamos ON usuarios.id_usuario = prestamos.id_usuario',
+        codigoInicial: 'SELECT usuarios.nombre_completo, prestamos.id_prestamo\nFROM usuarios\nLEFT JOIN prestamos\nON usuarios.id_usuario = prestamos.id_usuario'
       },
       {
         nivel: 2,
@@ -344,7 +348,7 @@ export const LECCIONES: Leccion[] = [
         esquema: 'dificil_aeropuerto',
         enunciado: 'Nombre del modelo de avión y número de vuelo (incluye los modelos que no tienen ningún vuelo programado actualmente).',
         pista: 'Une "modelos_avion" con "vuelos" usando LEFT JOIN.',
-        solucionEsperada: 'SELECT modelos_avion.nombre_modelo, vuelos.numero_vuelo FROM modelos_avion LEFT JOIN vuelos ON modelos_avion.id_modelo = vuelos.id_modelo_avion'
+        solucionEsperada: 'SELECT nombre_modelo, numero_vuelo FROM modelos_avion LEFT JOIN vuelos ON modelos_avion.id_modelo = vuelos.id_avion'
       }
     ]
   }
