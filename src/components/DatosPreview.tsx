@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useSqlVisualizer, evaluateWhere } from '../hooks/useSqlVisualizer';
 import {
   ReactFlow,
@@ -8,11 +8,12 @@ import {
   useReactFlow,
   useNodesState,
   useEdgesState,
+  ReactFlowProvider,
   MarkerType,
   type Node,
   type Edge
 } from '@xyflow/react';
-import { ZoomIn, ZoomOut, Maximize, ArrowUp, ArrowDown, Key, Layers, Maximize2, Minimize2 } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize, ArrowUp, ArrowDown, Key, Layers, Maximize2, Minimize2, X } from 'lucide-react';
 import '@xyflow/react/dist/style.css';
 
 interface ColumnDef { name: string; }
@@ -35,7 +36,7 @@ const AutoCentrador = ({ focusedTable }: { focusedTable: string | null }) => {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      fitView({ padding: 0.2, duration: 0, maxZoom: 1.5 });
+      fitView({ padding: 0.2, duration: 400, maxZoom: 1.5 });
     }, 50);
     return () => clearTimeout(timeoutId);
   }, [focusedTable, fitView]);
@@ -69,12 +70,16 @@ const sortRows = (rows: any[], orderBy: { column: string, direction: 'ASC'|'DESC
   });
 };
 
-export const DatosPreview: React.FC<DatosPreviewProps> = ({ query, tables }) => {
+export const DatosPreviewContent: React.FC<DatosPreviewProps> = ({ query, tables }) => {
+  const {fitView} = useReactFlow();
   const { activeTables, whereAST, joinDetails, selectedColumns, isSelectAll, orderBy, groupBy, aggregations, havingAST, limit } = useSqlVisualizer(query);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
-  const [focusedTable, setFocusedTable] = React.useState<string | null>(null);
+  const [focusedTable, setFocusedTable] = useState<string | null>(null);
+  const [showNotification, setShowNotification] = useState(true);
+
+
 
   const isColumnSelected = (colName: string, tableName: string) => {
     if (isSelectAll) return true;
@@ -178,7 +183,14 @@ export const DatosPreview: React.FC<DatosPreviewProps> = ({ query, tables }) => 
 
     return { tableName: 'Resultado Agrupación', columns: groupCols, rows: sortRows(groupedRows, orderBy, groupCols.map(c => c.name)) };
   }, [groupBy, aggregations, mergedTable, normalizedTables, activeTables, orderBy]);
-useEffect(() => {
+
+  useEffect(() => {
+    if (mergedTable || groupedTable) {
+      setShowNotification(true);
+    }
+  }, [mergedTable, groupedTable]);
+
+  useEffect(() => {
     const newNodes: Node[] = [];
     const newEdges: Edge[] = [];
 
@@ -192,7 +204,6 @@ useEffect(() => {
     // 1. Renderizado de Tablas de Origen con posicionamiento fijo
     tablesToRender.forEach((table, index) => {
       const isTargetTable = activeTables.some(at => at.toLowerCase() === table.tableName.toLowerCase());
-      const isFocused = focusedTable === table.tableName;
 
       // Cuadrícula automática por defecto
       const cols = 3;
@@ -328,7 +339,7 @@ const content = (
       newNodes.push({ id: `table-${table.tableName}`, type: 'dataNode', position: { x: posX, y: posY }, data: { content } });
     });
 // 2. Posicionar resultados (JOIN / GROUP BY) dinámicamente
-    const baseVirtualY = maxTableY + 600;
+    const baseVirtualY = maxTableY + 350;
 
     if (!focusedTable && mergedTable && joinDetails) {
       const esEsquemaAncho = tables.some(t => t.tableName === 'vuelos' || t.tableName === 'libros');
@@ -425,7 +436,7 @@ const content = (
       const sourceNodeId = mergedTable ? 'merged-table' : `table-${activeTables[0]}`;
       const esEsquemaAncho = tables.some(t => t.tableName === 'vuelos' || t.tableName === 'libros');
       const posX = esEsquemaAncho ? 850 : 425;
-      const posY = mergedTable ? baseVirtualY + 600 : baseVirtualY;
+      const posY = mergedTable ? baseVirtualY + 350 : baseVirtualY;
 
       const content = (
         <div className="w-max min-w-[350px] max-w-[800px] bg-[#1e293b] rounded-xl border border-orange-500 shadow-[0_0_40px_-10px_rgba(249,115,22,0.3)] overflow-hidden scale-[1.05]">
@@ -520,7 +531,7 @@ const content = (
   }, [normalizedTables, mergedTable, groupedTable, activeTables, whereAST, havingAST, joinDetails, orderBy, isSelectAll, limit, focusedTable, query, tables, setNodes, setEdges, setFocusedTable]);
 
   return (
-    <div className="relative w-full h-full"> {/* Añadimos "relative" para el banner absoluto */}
+    <div className="relative w-full h-full bg-[#0f172a]">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -532,30 +543,64 @@ const content = (
         panActivationKeyCode={null}
         colorMode="dark"
         proOptions={{ hideAttribution: true }}
-        className="bg-[#0f172a] [&_.react-flow__attribution]:hidden"
+        className="[&_.react-flow__attribution]:hidden"
       >
         <Background variant={BackgroundVariant.Dots} color="#334155" gap={24} size={1} style={{ backgroundColor: '#0f172a' }} />
         <ControlesPersonalizados />
         <AutoCentrador focusedTable={focusedTable} />
       </ReactFlow>
 
-      {/* NUEVO: Banner de Advertencia Flotante */}
-      {focusedTable && (mergedTable || groupedTable) && (
-        <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-50 flex items-center gap-4 bg-[#1e293b] border border-fuchsia-500 px-5 py-2.5 rounded-full shadow-[0_0_30px_-5px_rgba(217,70,239,0.5)] animate-bounce">
-          <div className="flex items-center gap-2">
-            <Layers className="w-5 h-5 text-fuchsia-400" />
-            <span className="text-sm font-medium text-slate-200">
-              ¡Operación exitosa! Has generado un {groupedTable ? 'GROUP BY' : 'JOIN'}.
-            </span>
+      {/* Banner de aviso controlado por el estado showNotification */}
+      {showNotification && (mergedTable || groupedTable) && (
+        <div className="absolute top-6 left-6 z-[100] animate-in fade-in slide-in-from-left-4 duration-500">
+          <div className="flex flex-col gap-3 bg-slate-900/95 backdrop-blur-md border border-fuchsia-500/50 p-4 rounded-2xl shadow-2xl max-w-[280px] relative overflow-hidden">
+
+            {/* BOTÓN X: Ahora es una X real y más visible */}
+            <button
+              onClick={() => setShowNotification(false)}
+              className="absolute top-2 right-2 p-1.5 text-slate-500 hover:text-white hover:bg-white/10 rounded-lg transition-all cursor-pointer group"
+              title="Cerrar aviso"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-3 pr-6">
+              <div className="bg-fuchsia-500/20 p-2 rounded-xl">
+                <Layers className="w-5 h-5 text-fuchsia-400" />
+              </div>
+              <div>
+                <p className="text-[11px] font-black text-fuchsia-400 uppercase tracking-widest">Consulta procesada</p>
+                <p className="text-sm text-slate-200">
+                  {groupedTable ? 'Agrupación lista' : 'Fusión de tablas lista'}.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setFocusedTable(null);
+                setShowNotification(false);
+                setTimeout(() => {
+                  fitView({
+                    nodes: [{ id: groupedTable ? 'grouped-table' : 'merged-table' }],
+                    duration: 500,
+                    padding: 0.2
+                  });
+                }, 100);
+              }}
+              className="w-full bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-xs font-bold py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-fuchsia-900/20"
+            >
+              <Maximize2 className="w-3.5 h-3.5" /> Ver resultado ahora
+            </button>
           </div>
-          <button
-            onClick={() => setFocusedTable(null)}
-            className="bg-fuchsia-900/50 hover:bg-fuchsia-600 text-fuchsia-100 text-xs font-bold px-4 py-1.5 rounded-full border border-fuchsia-500 transition-colors cursor-pointer"
-          >
-            Ver resultado
-          </button>
         </div>
       )}
     </div>
   );
 };
+
+export const DatosPreview = (props: DatosPreviewProps) => (
+  <ReactFlowProvider>
+    <DatosPreviewContent {...props} />
+  </ReactFlowProvider>
+);
