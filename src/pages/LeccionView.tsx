@@ -200,6 +200,14 @@ export function LeccionView() {
 
   const ejecutarQuery = async () => {
     if (!ejercicio || ejercicioBloqueada) return;
+
+    if (!consulta.trim()) {
+    setMensajeConsola('La consulta está vacía. Escribe tu código SQL antes de validar.');
+    setActiveTab('output');
+    setIsConsoleOpen(true);
+    return;
+  }
+
     setMensajeConsola('Verificando...');
     setActiveTab('output');
     setIsConsoleOpen(true);
@@ -210,6 +218,7 @@ export function LeccionView() {
         esquema_nombre: ejercicio.esquema
       });
       if (error) throw error;
+
       const filas = data || [];
       setResultadosQuery(filas);
       setColumnasQuery(filas.length > 0 ? Object.keys(filas[0]) : []);
@@ -219,18 +228,20 @@ export function LeccionView() {
       if (isCorrect) {
         setMensajeConsola('¡Excelente! Has conseguido los datos que buscábamos.');
         setIsSuccess(true);
-        setShowSuccessPopup(true);
+
+        // --- AÑADIMOS EL RETARDO AQUÍ ---
+        setTimeout(() => {
+          setShowSuccessPopup(true);
+        }, 600);
+        // --------------------------------
 
         if (ejercicioActualIdx === leccion.ejercicios.length - 1 && user) {
-          supabase.from('progreso_usuarios').upsert({
+          await supabase.from('progreso_usuarios').upsert({
             user_id: user.id,
             lesson_id: leccionId,
             completado_at: new Date().toISOString()
-          }).then(({ error }) => {
-            if (error) console.error('Error guardando progreso:', error.message);
           });
         }
-
       } else {
         setMensajeConsola('La consulta se ha ejecutado, pero los datos devueltos no son exactamente los solicitados.');
         setIsSuccess(false);
@@ -394,12 +405,16 @@ export function LeccionView() {
             <div className="flex">
               {[{ id: 'output', label: 'Output', icon: Terminal }, { id: 'objetivo', label: 'Resultado Esperado', icon: Target }, { id: 'pista', label: 'Pista', icon: Lightbulb }].map(tab => (
                 <button
-                  key={tab.id}
-                  onClick={() => { setActiveTab(tab.id as TabId); setIsConsoleOpen(true); }}
-                  className={`px-5 py-3 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 transition-all border-b-2 cursor-pointer ${activeTab === tab.id ? 'border-blue-500 text-white bg-blue-500/5' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
-                >
-                  <tab.icon className="w-3.5 h-3.5" /> {tab.label}
-                </button>
+  key={tab.id}
+  onClick={() => { setActiveTab(tab.id as TabId); setIsConsoleOpen(true); }}
+  className={`px-5 py-3 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 transition-all border-b-2 cursor-pointer
+    ${activeTab === tab.id
+      ? (isSuccess && tab.id === 'output' ? 'border-emerald-500 text-emerald-400 bg-emerald-500/5' : 'border-blue-500 text-white bg-blue-500/5')
+      : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+>
+  <tab.icon className={`w-3.5 h-3.5 ${isSuccess && tab.id === 'output' && activeTab === tab.id ? 'text-emerald-400' : ''}`} />
+  {tab.label}
+</button>
               ))}
             </div>
 
@@ -460,50 +475,53 @@ export function LeccionView() {
       )}
 
       {showSuccessPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-          <div className="relative overflow-hidden bg-slate-900 border border-slate-700/50 p-10 rounded-[2.5rem] shadow-[0_0_60px_-15px_rgba(16,185,129,0.3)] max-w-md w-full text-center animate-in fade-in zoom-in duration-300">
-            <div className="absolute top-0 inset-x-0 h-1.5 bg-linear-to-r from-transparent via-emerald-500 to-transparent opacity-50"></div>
-            <button onClick={() => setShowSuccessPopup(false)} className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors cursor-pointer"><X className="w-6 h-6" /></button>
-            <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-8 ring-8 ring-emerald-500/5 shadow-inner"><CheckCircle2 className="w-12 h-12 text-emerald-400" /></div>
+  <div className="fixed bottom-8 right-8 z-50 w-full max-w-sm animate-in slide-in-from-right-full duration-500 ease-out">
+    <div className="relative overflow-hidden bg-slate-900 border border-emerald-500/40 p-6 rounded-3xl shadow-[0_20px_50px_-10px_rgba(16,185,129,0.3)] ring-1 ring-emerald-500/20">
+      {/* Línea decorativa superior */}
+      <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent"></div>
 
-            <h3 className="text-3xl font-black text-white mb-3 tracking-tight">¡Misión Cumplida!</h3>
+      <div className="flex items-start gap-4">
+        <div className="flex-shrink-0 w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center shadow-inner">
+          <CheckCircle2 className="w-7 h-7 text-emerald-400" />
+        </div>
 
+        <div className="flex-1">
+          <h3 className="text-xl font-black text-white mb-1 tracking-tight">¡Misión Cumplida!</h3>
+          <p className="text-slate-400 text-sm leading-snug mb-4">
+            {ejercicioActualIdx < leccion.ejercicios.length - 1
+              ? `Has superado el ejercicio ${ejercicioActualIdx + 1}.`
+              : '¡Has completado toda la lección!'}
+          </p>
+
+          <div className="flex gap-2">
             {ejercicioActualIdx < leccion.ejercicios.length - 1 ? (
-                <p className="text-slate-400 mb-10 text-base leading-relaxed">
-                  Has completado el <b>ejercicio {ejercicioActualIdx + 1}</b> de la Lección {leccion.id} ({leccion.titulo}).<br/>¡Sigue así!
-                </p>
+              <button
+                onClick={() => { setShowSuccessPopup(false); setEjercicioActualIdx(f => f + 1); }}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs uppercase tracking-wider"
+              >
+                Siguiente <ArrowRight className="w-4 h-4" />
+              </button>
             ) : (
-                <p className="text-slate-400 mb-10 text-base leading-relaxed">
-                  ¡Enhorabuena! Has completado <b>todos los ejercicios</b> de la Lección {leccion.id} ({leccion.titulo}).<br/>
-                  Tu dominio de este concepto es oficial.
-                </p>
+              <button
+                onClick={finalizarLeccion}
+                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs uppercase tracking-wider"
+              >
+                Finalizar <ArrowRight className="w-4 h-4" />
+              </button>
             )}
-
-            <div className="flex flex-col gap-4">
-              {ejercicioActualIdx < leccion.ejercicios.length - 1 ? (
-                <button onClick={() => { setShowSuccessPopup(false); setEjercicioActualIdx(f => f + 1); }} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-3 cursor-pointer uppercase text-sm tracking-widest">Siguiente Ejercicio <ArrowRight className="w-5 h-5" /></button>
-              ) : (
-                <button onClick={finalizarLeccion} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-3 cursor-pointer uppercase text-sm tracking-widest">
-              {leccionId < LECCIONES.length
-                ? `Ir a la Lección ${leccionId + 1}`
-                : 'Terminar Curso'
-              }
-              <ArrowRight className="w-5 h-5" />
-              </button>
-              )}
-
-              <button onClick={() => {
-                  setShowSuccessPopup(false);
-                  setEjercicioBloqueada(true);
-              }} className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-4 rounded-2xl transition-all border border-slate-700 cursor-pointer text-sm">
-                  Espera, quiero seguir revisando esta lección
-              </button>
-
-              <button onClick={() => navigate('/lecciones')} className="text-xs text-slate-500 hover:text-slate-300 mt-2 font-black uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-colors"><Home className="w-4 h-4" /> Volver al Dashboard</button>
-            </div>
+            <button
+              onClick={() => { setShowSuccessPopup(false); setEjercicioBloqueada(true); }}
+              className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-xl border border-slate-700 transition-colors"
+              title="Cerrar y revisar"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
         </div>
-      )}
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

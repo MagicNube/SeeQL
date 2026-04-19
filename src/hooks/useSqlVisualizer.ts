@@ -40,41 +40,56 @@ const resolveColumn = (row: any, column: string, table?: string) => {
 export const evaluateWhere = (row: any, ast: any): boolean => {
   if (!ast) return true;
 
-  const resolveNode = (node: any) => {
-    if (!node) return undefined;
-    if (node.type === 'column_ref') {
-      return resolveColumn(row, node.column, node.table);
-    } else if (node.type === 'aggr_func') {
-      const funcName = node.name.toUpperCase();
-      const colName = node.args && node.args.expr ? (node.args.expr.type === 'star' ? '*' : node.args.expr.column) : '*';
-      return resolveColumn(row, `${funcName}(${colName})`);
-    } else {
-      return node.value;
-    }
-  };
+  // Manejo de valores literales y referencias a columnas
+  if (ast.type === 'column_ref') {
+    const val = resolveColumn(row, ast.column, ast.table);
+    return val !== undefined ? val : false;
+  }
+
+  if (ast.type === 'bool' || ast.type === 'boolean') {
+    return ast.value;
+  }
 
   if (ast.type === 'binary_expr') {
-    const leftValue = resolveNode(ast.left);
-    const rightValue = resolveNode(ast.right);
-    const op = ast.operator;
+    const { left, right, operator } = ast;
 
-    if (leftValue === undefined || rightValue === undefined) return true;
+    // RECURSIVIDAD LÓGICA: Evaluamos ramas completas antes de aplicar AND/OR
+    if (operator === 'AND') {
+      return evaluateWhere(row, left) && evaluateWhere(row, right);
+    }
+    if (operator === 'OR') {
+      return evaluateWhere(row, left) || evaluateWhere(row, right);
+    }
 
-    switch (op) {
-      case '=': return String(leftValue).toLowerCase() === String(rightValue).toLowerCase();
-      case '>': return Number(leftValue) > Number(rightValue);
-      case '<': return Number(leftValue) < Number(rightValue);
-      case '>=': return Number(leftValue) >= Number(rightValue);
-      case '<=': return Number(leftValue) <= Number(rightValue);
-      case '!=': return String(leftValue).toLowerCase() !== String(rightValue).toLowerCase();
+    // COMPARACIÓN ESTÁNDAR: Resolvemos valores finales
+    const resolveValue = (node: any) => {
+      if (!node) return undefined;
+      if (node.type === 'column_ref') return resolveColumn(row, node.column, node.table);
+      if (node.type === 'number' || node.type === 'string' || node.type === 'single_quote_string') return node.value;
+      return node.value;
+    };
+
+    const leftVal = resolveValue(left);
+    const rightVal = resolveValue(right);
+
+    // Si la columna no existe en esta fila, no podemos comparar
+    if (leftVal === undefined && left.type === 'column_ref') return false;
+
+    switch (operator) {
+      case '=': return String(leftVal).toLowerCase() === String(rightVal).toLowerCase();
+      case '>': return Number(leftVal) > Number(rightVal);
+      case '<': return Number(leftVal) < Number(rightVal);
+      case '>=': return Number(leftVal) >= Number(rightVal);
+      case '<=': return Number(leftVal) <= Number(rightVal);
+      case '!=':
+      case '<>': return String(leftVal).toLowerCase() !== String(rightVal).toLowerCase();
       case 'LIKE':
-        const regexStr = String(rightValue).replace(/%/g, '.*');
-        return new RegExp(`^${regexStr}$`, 'i').test(String(leftValue));
-      case 'AND': return evaluateWhere(row, ast.left) && evaluateWhere(row, ast.right);
-      case 'OR': return evaluateWhere(row, ast.left) || evaluateWhere(row, ast.right);
+        const regex = String(rightVal).replace(/%/g, '.*');
+        return new RegExp(`^${regex}$`, 'i').test(String(leftVal));
       default: return true;
     }
   }
+
   return true;
 };
 

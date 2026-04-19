@@ -3,6 +3,10 @@ export const traducirErrorSQL = (mensajeOriginal: string): string => {
 
   const msg = mensajeOriginal.toLowerCase();
 
+  if (msg.includes('empty query') || msg.includes('syntax error at end of input')) {
+    return 'La consulta está vacía. Escribe algo de código SQL para poder ejecutarlo.';
+  }
+
   // Chivato oculto para ti en desarrollo
   console.log("Supabase error original:", mensajeOriginal);
 

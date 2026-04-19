@@ -93,24 +93,30 @@ export const Dashboard = () => {
         </div>
 
         {/* Footer de progreso */}
-        {user && (
-          <div className="mt-12 flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="bg-slate-800/50 border border-slate-700/50 px-6 py-3 rounded-2xl flex items-center gap-4 shadow-xl">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Tu Progreso General</span>
-                <div className="flex items-center gap-3">
-                  <div className="w-32 h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-1000"
-                      style={{ width: `${(leccionesCompletadas / 10) * 100}%` }}
-                    />
-                  </div>
-                  <span className="text-sm font-bold text-white">{leccionesCompletadas} / 10</span>
-                </div>
-              </div>
-            </div>
+        {/* Footer de progreso - Versión Ampliada */}
+{user && (
+  <div className="mt-16 flex justify-center animate-in fade-in slide-in-from-bottom-6 duration-1000">
+    <div className="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 px-10 py-6 rounded-4xl flex items-center gap-6 shadow-2xl ring-1 ring-white/5">
+      <div className="flex flex-col">
+        <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 text-center sm:text-left">
+          Tu Progreso en las lecciones
+        </span>
+        <div className="flex items-center gap-6">
+          <div className="w-48 h-2.5 bg-slate-900/80 rounded-full overflow-hidden shadow-inner border border-slate-700/30">
+            <div
+              className="h-full bg-linear-to-r from-blue-600 via-blue-400 to-cyan-400 transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(59,130,246,0.5)]"
+              style={{ width: `${(leccionesCompletadas / 10) * 100}%` }}
+            />
           </div>
-        )}
+          <div className="flex items-baseline gap-1">
+            <span className="text-2xl font-black text-white">{leccionesCompletadas}</span>
+            <span className="text-slate-500 font-bold">/ 10</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
       </div>
     </div>
   );

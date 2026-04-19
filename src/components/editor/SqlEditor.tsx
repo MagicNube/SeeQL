@@ -13,6 +13,24 @@ export const SqlEditor = ({ value, onChange, estructura = {} }: Props) => {
   useEffect(() => {
     if (!monaco) return;
 
+    // DEFINIMOS EL TEMA PERSONALIZADO PARA ELIMINAR EL ROJO
+    monaco.editor.defineTheme('seeql-theme', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: 'string', foreground: 'fde047' }, // Amarillo/Ámbar para 'TEXTO'
+        { token: 'keyword', foreground: '3b82f6', fontStyle: 'bold' }, // Azul para SELECT/LIKE
+        { token: 'string.sql', foreground: 'fde047' }, // Refuerzo específico para SQL
+        { token: 'identifier', foreground: 'ffffff' },
+      ],
+      colors: {
+        'editor.background': '#1e1e1e',
+      }
+    });
+
+    // APLICAMOS EL TEMA
+    monaco.editor.setTheme('seeql-theme');
+
     const provider = monaco.languages.registerCompletionItemProvider('sql', {
       provideCompletionItems: (model, position) => {
         const word = model.getWordUntilPosition(position);
@@ -79,7 +97,7 @@ export const SqlEditor = ({ value, onChange, estructura = {} }: Props) => {
       <Editor
         height="100%"
         defaultLanguage="sql"
-        theme="vs-dark"
+        theme="seeql-theme"
         value={value}
         onChange={onChange}
         options={{

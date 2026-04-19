@@ -195,49 +195,68 @@ export const DatosPreview: React.FC<DatosPreviewProps> = ({ query, tables }) => 
     let columnaActual = 0;
 
     const tablesToRender = focusedTable
-        ? normalizedTables.filter(t => t.tableName === focusedTable)
-        : normalizedTables;
+    ? normalizedTables.filter(t => t.tableName === focusedTable)
+    : normalizedTables;
 
     // 1. Posicionar Tablas Origen (Se ha eliminado 'index' y 'estimatedWidth')
     tablesToRender.forEach((table) => {
-      const isTargetTable = activeTables.some(at => at.toLowerCase() === table.tableName.toLowerCase());
+  const isTargetTable = activeTables.some(at => at.toLowerCase() === table.tableName.toLowerCase());
+  const isFocused = focusedTable === table.tableName; // <--- Detectamos si esta es la tabla ampliada
 
-      const VISIBLE_ROWS = 5;
-      const rowsToRender = table.normalizedRows.slice(0, VISIBLE_ROWS);
-      const hiddenRowsCount = table.normalizedRows.length - VISIBLE_ROWS;
+  const VISIBLE_ROWS = 5;
+  const rowsToRender = table.normalizedRows.slice(0, VISIBLE_ROWS);
+  const hiddenRowsCount = table.normalizedRows.length - VISIBLE_ROWS;
 
-      const estimatedHeight = 80 + (rowsToRender.length * 45) + (hiddenRowsCount > 0 ? 40 : 0);
+  const estimatedHeight = 80 + (rowsToRender.length * 45) + (hiddenRowsCount > 0 ? 40 : 0);
 
-      if (columnaActual >= COLUMNAS_MAXIMAS) {
-        columnaActual = 0;
-        currentY += maxRowHeight + ESPACIO_VERTICAL;
-        maxRowHeight = 0;
-      }
+  if (columnaActual >= COLUMNAS_MAXIMAS) {
+    columnaActual = 0;
+    currentY += maxRowHeight + ESPACIO_VERTICAL;
+    maxRowHeight = 0;
+  }
 
-      if (estimatedHeight > maxRowHeight) maxRowHeight = estimatedHeight;
+  if (estimatedHeight > maxRowHeight) maxRowHeight = estimatedHeight;
 
-      const posX = 50 + (columnaActual * (800 + ESPACIO_HORIZONTAL));
-      const posY = currentY;
+  // --- MODIFICACIÓN AQUÍ ---
+  // Si está enfocada y hay un resultado (groupedTable o mergedTable), la subimos a -150
+  const posX = isFocused ? 0 : 50 + (columnaActual * (800 + ESPACIO_HORIZONTAL));
+  const tieneResultado = isTargetTable && (groupedTable || mergedTable);
+  const posY = isFocused && tieneResultado ? -150 : currentY;
+  // --------------------------
 
-      if (posY + estimatedHeight > maxOrigenY) maxOrigenY = posY + estimatedHeight;
+  if (posY + estimatedHeight > maxOrigenY) maxOrigenY = posY + estimatedHeight;
 
-      columnaActual++;
+  columnaActual++;
+
 
       const content = (
-        <div className={`w-max min-w-[320px] max-w-200 bg-[#1e293b] rounded-xl border transition-all duration-300 ${isTargetTable && !focusedTable ? 'border-blue-500 shadow-[0_0_30px_-5px_rgba(59,130,246,0.4)] scale-[1.02]' : 'border-slate-700 opacity-70'}`}>
-          <div className={`border-b border-slate-700 p-3 flex items-center justify-between ${isTargetTable && !focusedTable ? 'bg-blue-900/30' : 'bg-slate-800/80'}`}>
-            <div className="flex items-center gap-3">
-              <span className={`font-black text-sm tracking-wide ${isTargetTable && !focusedTable ? 'text-blue-300' : 'text-slate-200'}`}>{table.tableName}</span>
-              <button
-                onClick={() => setFocusedTable(focusedTable === table.tableName ? null : table.tableName)}
-                className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title={focusedTable ? "Volver a ver todas las tablas" : "Centrar esta tabla"}
-              >
-                {focusedTable ? <Minimize2 className="w-4 h-4 text-emerald-400" /> : <Maximize2 className="w-4 h-4" />}
-              </button>
-            </div>
-            <span className="text-[10px] font-bold text-slate-400 bg-slate-900 px-2.5 py-1 rounded-md border border-slate-700 uppercase tracking-widest">Origen</span>
-          </div>
+  <div className={`w-max min-w-[320px] max-w-200 bg-[#1e293b] rounded-xl border transition-all duration-300
+    ${isTargetTable
+      ? 'border-blue-500 shadow-[0_0_30px_-5px_rgba(59,130,246,0.4)] scale-[1.02]'
+      : 'border-slate-700 opacity-70'}`}>
+
+    <div className={`border-b border-slate-700 p-3 flex items-center justify-between
+      ${isTargetTable ? 'bg-blue-900/30' : 'bg-slate-800/80'}`}>
+
+      <div className="flex items-center gap-3">
+        {/* Nombre de la tabla con el color azul si es la activa */}
+        <span className={`font-black text-sm tracking-wide ${isTargetTable ? 'text-blue-300' : 'text-slate-200'}`}>
+          {table.tableName}
+        </span>
+
+        <button
+          onClick={() => setFocusedTable(focusedTable === table.tableName ? null : table.tableName)}
+          className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition-colors cursor-pointer"
+          title={focusedTable ? "Volver a ver todas las tablas" : "Centrar esta tabla"}
+        >
+          {focusedTable ? <Minimize2 className="w-4 h-4 text-emerald-400" /> : <Maximize2 className="w-4 h-4" />}
+        </button>
+      </div>
+
+      <span className="text-[10px] font-bold text-slate-400 bg-slate-900 px-2.5 py-1 rounded-md border border-slate-700 uppercase tracking-widest">
+        Origen
+      </span>
+    </div>
           <div className="overflow-x-auto p-1.5 bg-[#0f172a]/50 rounded-b-xl">
             <table className="w-full text-left text-sm">
               <thead className="bg-[#0f172a]">
@@ -270,8 +289,8 @@ export const DatosPreview: React.FC<DatosPreviewProps> = ({ query, tables }) => 
                         if (limit !== null && matchCount > limit) { withinLimit = false; }
                     }
 
-                    const isHighlighted = isTargetTable && isMatch && withinLimit && !joinDetails && !groupedTable && !focusedTable;
-                    const isFaded = isTargetTable && (!isMatch || !withinLimit) && !joinDetails && !groupedTable && !focusedTable;
+                    const isHighlighted = isTargetTable && isMatch && withinLimit && !joinDetails && !groupedTable;
+                    const isFaded = isTargetTable && (!isMatch || !withinLimit) && !joinDetails && !groupedTable;
 
                     return (
                       <tr key={i} className={`transition-all duration-300 hover:bg-slate-800/60 ${isFaded ? 'opacity-30' : 'opacity-100'} ${isHighlighted ? 'border-l-4 border-emerald-500' : 'border-l-4 border-transparent'}`}>
@@ -307,7 +326,7 @@ export const DatosPreview: React.FC<DatosPreviewProps> = ({ query, tables }) => 
       newNodes.push({ id: `table-${table.tableName}`, type: 'dataNode', position: { x: posX, y: posY }, data: { content } });
     });
 
-    if (mergedTable && joinDetails && !focusedTable) {
+    if (mergedTable && joinDetails) {
       const parentLeft = newNodes.find(n => n.id === `table-${joinDetails.leftTable}`);
       const parentRight = newNodes.find(n => n.id === `table-${joinDetails.rightTable}`);
       const posX = ((parentLeft?.position.x || 0) + (parentRight?.position.x || 0)) / 2;
@@ -397,95 +416,100 @@ export const DatosPreview: React.FC<DatosPreviewProps> = ({ query, tables }) => 
       );
     }
 
-    if (groupedTable && !focusedTable) {
-      const sourceNodeId = mergedTable ? 'merged-table' : `table-${activeTables[0]}`;
-      const sourceNode = newNodes.find(n => n.id === sourceNodeId);
-      const posX = (sourceNode?.position.x || 0);
-      const posY = (sourceNode?.position.y || maxOrigenY) + 250;
+    if (groupedTable) {
+  const sourceNodeId = mergedTable ? 'merged-table' : `table-${activeTables[0]}`;
+  const sourceNode = newNodes.find(n => n.id === sourceNodeId);
 
-      const content = (
-        <div className="w-max min-w-87.5 max-w-200 bg-[#1e293b] rounded-xl border border-orange-500 shadow-[0_0_40px_-10px_rgba(249,115,22,0.3)] overflow-hidden scale-[1.05]">
-           <div className="bg-orange-900/30 border-b border-orange-500/30 p-3 flex items-center justify-between">
-              <span className="font-black text-orange-300 text-sm tracking-wide uppercase flex items-center gap-2"><Layers className="w-5 h-5"/> {groupedTable.tableName}</span>
-              <span className="text-[10px] font-bold text-orange-400 bg-orange-950 px-2.5 py-1 rounded-md border border-orange-800 animate-pulse uppercase tracking-widest">Agrupación</span>
-           </div>
-           <div className="overflow-x-auto p-1.5 bg-[#0f172a]/50 rounded-b-xl">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-[#0f172a]">
-                  <tr>
-                    {groupedTable.columns.map((col, idx) => {
-                      const isSorted = orderBy && (orderBy.column.toLowerCase() === col.name.toLowerCase());
-                      const sortIcon = isSorted ? (orderBy.direction === 'DESC' ? <ArrowDown className="w-4 h-4 ml-1 inline-block text-yellow-400" /> : <ArrowUp className="w-4 h-4 ml-1 inline-block text-yellow-400" />) : null;
-                      const isAgg = col.type === 'Agregacion';
+  // --- LÓGICA DE POSICIONAMIENTO DINÁMICO ---
+  // Si hay una tabla enfocada, la ponemos en (0, 450) porque el foco resetea la cámara al origen.
+  // Si no hay foco, mantenemos el comportamiento de aparecer debajo de la tabla original en el mapa.
+  const posX = focusedTable ? 0 : (sourceNode?.position.x || 0);
+  const posY = focusedTable ? 450 : (sourceNode?.position.y || maxOrigenY) + 250;
+  // ------------------------------------------
 
-                      return (
-                        <th key={idx} className={`p-3 font-semibold border-b border-slate-800 whitespace-nowrap ${isSorted ? 'text-yellow-400 font-bold bg-yellow-900/10' : isAgg ? 'text-orange-300' : 'text-blue-300'}`}>
-                          <div className="flex items-center">{col.name} {sortIcon}</div>
-                        </th>
-                      );
-                    })}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/80">
-                  {(() => {
-                    let matchCount = 0;
-                    const VISIBLE_ROWS_GROUP = 5;
-                    const rowsToRenderGroup = groupedTable.rows.slice(0, VISIBLE_ROWS_GROUP);
-                    const hiddenRowsCountGroup = groupedTable.rows.length - VISIBLE_ROWS_GROUP;
+  const content = (
+    <div className="w-max min-w-87.5 max-w-200 bg-[#1e293b] rounded-xl border border-orange-500 shadow-[0_0_40px_-10px_rgba(249,115,22,0.3)] overflow-hidden scale-[1.05]">
+       <div className="bg-orange-900/30 border-b border-orange-500/30 p-3 flex items-center justify-between">
+          <span className="font-black text-orange-300 text-sm tracking-wide uppercase flex items-center gap-2"><Layers className="w-5 h-5"/> {groupedTable.tableName}</span>
+          <span className="text-[10px] font-bold text-orange-400 bg-orange-950 px-2.5 py-1 rounded-md border border-orange-800 animate-pulse uppercase tracking-widest">Agrupación</span>
+       </div>
+       <div className="overflow-x-auto p-1.5 bg-[#0f172a]/50 rounded-b-xl">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-[#0f172a]">
+              <tr>
+                {groupedTable.columns.map((col, idx) => {
+                  const isSorted = orderBy && (orderBy.column.toLowerCase() === col.name.toLowerCase());
+                  const sortIcon = isSorted ? (orderBy.direction === 'DESC' ? <ArrowDown className="w-4 h-4 ml-1 inline-block text-yellow-400" /> : <ArrowUp className="w-4 h-4 ml-1 inline-block text-yellow-400" />) : null;
+                  const isAgg = col.type === 'Agregacion';
 
-                    return (
-                        <React.Fragment>
-                        {rowsToRenderGroup.map((row, i) => {
-                            const isMatch = evaluateWhere(row, havingAST);
+                  return (
+                    <th key={idx} className={`p-3 font-semibold border-b border-slate-800 whitespace-nowrap ${isSorted ? 'text-yellow-400 font-bold bg-yellow-900/10' : isAgg ? 'text-orange-300' : 'text-blue-300'}`}>
+                      <div className="flex items-center">{col.name} {sortIcon}</div>
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/80">
+              {(() => {
+                let matchCount = 0;
+                const VISIBLE_ROWS_GROUP = 5;
+                const rowsToRenderGroup = groupedTable.rows.slice(0, VISIBLE_ROWS_GROUP);
+                const hiddenRowsCountGroup = groupedTable.rows.length - VISIBLE_ROWS_GROUP;
 
-                            let withinLimit = true;
-                            if (isMatch) {
-                                matchCount++;
-                                if (limit !== null && matchCount > limit) { withinLimit = false; }
-                            }
+                return (
+                    <React.Fragment>
+                    {rowsToRenderGroup.map((row, i) => {
+                        const isMatch = evaluateWhere(row, havingAST);
 
-                            const isHighlighted = isMatch && havingAST && withinLimit;
-                            const isFaded = (havingAST && !isMatch) || (!withinLimit);
+                        let withinLimit = true;
+                        if (isMatch) {
+                            matchCount++;
+                            if (limit !== null && matchCount > limit) { withinLimit = false; }
+                        }
 
-                            return (
-                                <tr key={i} className={`transition-all duration-300 hover:bg-slate-800/60 ${isFaded ? 'opacity-30' : 'opacity-100'} ${isHighlighted ? 'border-l-4 border-emerald-500' : 'border-l-4 border-transparent'}`}>
-                                {groupedTable.columns.map((col, j) => {
-                                    const isSorted = orderBy && (orderBy.column.toLowerCase() === col.name.toLowerCase());
-                                    const isAgg = col.type === 'Agregacion';
-                                    const val = row[col.name];
-                                    return (
-                                    <td key={j} className={`p-3 whitespace-nowrap ${isSorted ? 'text-yellow-100 bg-yellow-900/10' : isAgg ? 'text-orange-200 font-mono font-bold' : 'text-slate-200'}`}>
-                                        {String(val)}
-                                    </td>
-                                    );
-                                })}
-                                </tr>
-                            );
-                        })}
-                        {hiddenRowsCountGroup > 0 && (
-                            <tr>
-                                <td colSpan={groupedTable.columns.length} className="bg-[#0f172a] text-center py-2.5 px-4 text-xs text-slate-500 font-bold border-t border-slate-800/80 shadow-inner">
-                                    + {hiddenRowsCountGroup} grupos más calculados...
+                        const isHighlighted = isMatch && havingAST && withinLimit;
+                        const isFaded = (havingAST && !isMatch) || (!withinLimit);
+
+                        return (
+                            <tr key={i} className={`transition-all duration-300 hover:bg-slate-800/60 ${isFaded ? 'opacity-30' : 'opacity-100'} ${isHighlighted ? 'border-l-4 border-emerald-500' : 'border-l-4 border-transparent'}`}>
+                            {groupedTable.columns.map((col, j) => {
+                                const isSorted = orderBy && (orderBy.column.toLowerCase() === col.name.toLowerCase());
+                                const isAgg = col.type === 'Agregacion';
+                                const val = row[col.name];
+                                return (
+                                <td key={j} className={`p-3 whitespace-nowrap ${isSorted ? 'text-yellow-100 bg-yellow-900/10' : isAgg ? 'text-orange-200 font-mono font-bold' : 'text-slate-200'}`}>
+                                    {String(val)}
                                 </td>
+                                );
+                            })}
                             </tr>
-                        )}
-                        </React.Fragment>
-                    );
-                  })()}
-                </tbody>
-              </table>
-           </div>
-        </div>
-      );
+                        );
+                    })}
+                    {hiddenRowsCountGroup > 0 && (
+                        <tr>
+                            <td colSpan={groupedTable.columns.length} className="bg-[#0f172a] text-center py-2.5 px-4 text-xs text-slate-500 font-bold border-t border-slate-800/80 shadow-inner">
+                                + {hiddenRowsCountGroup} grupos más calculados...
+                            </td>
+                        </tr>
+                    )}
+                    </React.Fragment>
+                );
+              })()}
+            </tbody>
+          </table>
+       </div>
+    </div>
+  );
 
-      newNodes.push({ id: 'grouped-table', type: 'dataNode', position: { x: posX, y: posY }, data: { content } });
+  newNodes.push({ id: 'grouped-table', type: 'dataNode', position: { x: posX, y: posY }, data: { content } });
 
-      newEdges.push({
-        id: 'e-aggr', source: sourceNodeId, target: 'grouped-table', animated: true,
-        style: { stroke: '#f97316', strokeWidth: 3 },
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#f97316' }
-      });
-    }
+  newEdges.push({
+    id: 'e-aggr', source: sourceNodeId, target: 'grouped-table', animated: true,
+    style: { stroke: '#f97316', strokeWidth: 3 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: '#f97316' }
+  });
+}
 
   setNodes((prevNodes) =>
         newNodes.map((newNode) => {

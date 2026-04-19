@@ -114,6 +114,16 @@ export function Sandbox() {
   }, [esquemaActivo]);
 
   const ejecutarQuery = async () => {
+if (!consulta.trim()) {
+    setConsoleLog({
+      status: 'error',
+      message: 'La consulta está vacía. Escribe tu código SQL antes de ejecutar.',
+      timestamp: new Date().toLocaleTimeString()
+    });
+    setIsConsoleOpen(true);
+    return;
+  }
+
     setLoadingOutput(true);
     setIsConsoleOpen(true);
     const time = new Date().toLocaleTimeString();
@@ -166,9 +176,9 @@ export function Sandbox() {
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Editor SQL</label>
           <div className="flex-1 rounded-lg overflow-hidden border border-slate-800 bg-[#1e1e1e]">
             <SqlEditor
-              value={consulta}
-              onChange={(val) => setConsulta(val || '')}
-              estructura={estructuraActual}
+            value={consulta}
+            onChange={(val) => setConsulta(val || '')}
+            estructura={estructuraActual}
             />
           </div>
         </div>

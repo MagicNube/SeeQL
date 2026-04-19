@@ -1,5 +1,3 @@
-// src/data/lecciones.ts
-
 export type Dificultad = 'Fácil' | 'Medio' | 'Difícil';
 // Usamos los IDs exactos de la base de datos para evitar errores de mapeo
 export type EsquemaId = 'facil_biblioteca' | 'medio_gym' | 'dificil_aeropuerto';
@@ -34,7 +32,7 @@ export const LECCIONES: Leccion[] = [
         esquema: 'facil_biblioteca',
         enunciado: 'Muestra todos los datos de la tabla de autores.',
         teoria: 'La sentencia `SELECT *` se utiliza para pedir todas las columnas de una tabla. El `FROM` indica el nombre de la tabla que contiene los datos.',
-        pista: 'Usa "SELECT * FROM autores"',
+        pista: '¡Simplemente ejecuta, ya está resuelto!',
         codigoInicial: 'SELECT *\nFROM autores',
         solucionEsperada: 'SELECT * FROM autores'
       },
@@ -67,7 +65,7 @@ export const LECCIONES: Leccion[] = [
         esquema: 'facil_biblioteca',
         enunciado: 'Título de los libros cuyo año de publicación sea igual o posterior al año 2000.',
         teoria: 'La cláusula ``WHERE`` permite filtrar las filas. Solo aparecerán los registros que cumplan la condición.',
-        pista: 'Añade "WHERE anio_publicacion >= 2000" al final de tu consulta.',
+        pista: '¡Simplemente ejecuta, ya está resuelto!',
         codigoInicial: 'SELECT titulo\nFROM libros\nWHERE anio_publicacion >= 2000',
         solucionEsperada: 'SELECT titulo FROM libros WHERE anio_publicacion >= 2000'
       },
@@ -76,7 +74,6 @@ export const LECCIONES: Leccion[] = [
         dificultad: 'Medio',
         esquema: 'medio_gym',
         enunciado: 'Obtén todos los datos de los pagos que superen los 50 euros.',
-        codigoInicial: 'SELECT *\nFROM pagos\nWHERE monto > 50',
         pista: 'Recuerda que para seleccionar todos los campos se utiliza el asterisco (*).',
         solucionEsperada: 'SELECT * FROM pagos WHERE monto > 50'
       },
@@ -102,14 +99,15 @@ export const LECCIONES: Leccion[] = [
         esquema: 'facil_biblioteca',
         enunciado: 'Títulos de libros publicados desde el año 1900 que tengan más de 1 copia disponible.',
         teoria: 'Podemos combinar filtros. `AND` exige que se cumplan ambas condiciones. `OR` exige que se cumpla al menos una. `IN` busca dentro de una lista de valores.',
-        pista: 'Usa "anio_publicacion >= 1900 AND copias_disponibles > 1".',
-        solucionEsperada: 'SELECT titulo FROM libros WHERE anio_publicacion >= 1900 AND copias_disponibles > 1'
+        pista: '¡Simplemente ejecuta, ya está resuelto!',
+        solucionEsperada: 'SELECT titulo FROM libros WHERE anio_publicacion >= 1900 AND copias_disponibles > 1',
+        codigoInicial: 'SELECT titulo\nFROM libros\nWHERE anio_publicacion >= 1900 AND copias_disponibles > 1',
       },
       {
         nivel: 2,
         dificultad: 'Medio',
         esquema: 'medio_gym',
-        enunciado: 'Nombre de las clases que tengan capacidad de exactamente 20 personas O que sean impartidas por el entrenador con ID 1.',
+        enunciado: 'Nombre de las clases que tengan capacidad de exactamente 20 personas o que sean impartidas por el entrenador con ID 1.',
         pista: 'Utiliza el operador lógico OR entre las dos condiciones.',
         solucionEsperada: 'SELECT nombre_clase FROM clases WHERE capacidad_max = 20 OR id_entrenador = 1'
       },
@@ -118,7 +116,7 @@ export const LECCIONES: Leccion[] = [
         dificultad: 'Difícil',
         esquema: 'dificil_aeropuerto',
         enunciado: 'Número de los vuelos que salen desde los aeropuertos con ID 1 o 3.',
-        pista: 'Puedes usar "id_aeropuerto_origen IN (1, 3)" para hacerlo más corto.',
+        pista: 'Utiliza el operador IN para buscar dentro de la lista de aeropuertos origen.',
         solucionEsperada: 'SELECT numero_vuelo FROM vuelos WHERE id_aeropuerto_origen IN (1, 3)'
       }
     ]
@@ -132,10 +130,11 @@ export const LECCIONES: Leccion[] = [
         nivel: 1,
         dificultad: 'Fácil',
         esquema: 'facil_biblioteca',
-        enunciado: 'Muestra el nombre del autor más antiguo (fecha de nacimiento más pequeña).',
+        enunciado: 'Muestra el nombre del autor más antiguo.',
         teoria: '`ORDER BY` ordena los resultados (ASC por defecto). `LIMIT` restringe el número de filas que se muestran al final.',
-        pista: 'Ordena por fecha_nacimiento de forma ascendente (ASC) y limita el resultado a 1.',
-        solucionEsperada: 'SELECT nombre FROM autores ORDER BY fecha_nacimiento ASC LIMIT 1'
+        pista: '¡Simplemente ejecuta, ya está resuelto!',
+        solucionEsperada: 'SELECT nombre FROM autores ORDER BY fecha_nacimiento ASC LIMIT 1',
+        codigoInicial: 'SELECT nombre\nFROM autores\nORDER BY fecha_nacimiento ASC\nLIMIT 1',
       },
       {
         nivel: 2,
@@ -149,7 +148,7 @@ export const LECCIONES: Leccion[] = [
         nivel: 3,
         dificultad: 'Difícil',
         esquema: 'dificil_aeropuerto',
-        enunciado: 'ID de reserva y precio de las 2 reservas de billete más caras.',
+        enunciado: 'ID de reserva y precio de las 2 reservas más caras.',
         pista: 'Usa DESC en el precio_billete para poner los más caros arriba.',
         solucionEsperada: 'SELECT id_reserva, precio_billete FROM reservas ORDER BY precio_billete DESC LIMIT 2'
       }
@@ -166,22 +165,23 @@ export const LECCIONES: Leccion[] = [
         esquema: 'facil_biblioteca',
         enunciado: "Títulos de los libros que empiecen por la palabra 'Harry'.",
         teoria: '`LIKE` busca patrones. El símbolo `%` representa cualquier cantidad de caracteres. Por ejemplo, `A%` busca palabras que empiezan por A.',
-        pista: "Escribe: WHERE titulo LIKE 'Harry%'.",
-        solucionEsperada: "SELECT titulo FROM libros WHERE titulo LIKE 'Harry%'"
+        pista: '¡Simplemente ejecuta, ya está resuelto!',
+        solucionEsperada: "SELECT titulo FROM libros WHERE titulo LIKE 'Harry%'",
+        codigoInicial: "SELECT titulo\nFROM libros\nWHERE titulo LIKE 'Harry%'"
       },
       {
         nivel: 2,
         dificultad: 'Medio',
         esquema: 'medio_gym',
-        enunciado: "Busca el nombre y el email de los clientes cuyo correo termine exactamente en '@gmail.com'.",
-        pista: "Uso el porcentaje al principio del patrón: '%@gmail.com'.",
+        enunciado: "Busca el nombre y el email de los clientes cuyo email termine exactamente en '@gmail.com'.",
+        pista: "Usa el porcentaje al principio del patrón: '%@gmail.com'.",
         solucionEsperada: "SELECT nombre_completo, email FROM clientes WHERE email LIKE '%@gmail.com'"
       },
       {
         nivel: 3,
         dificultad: 'Difícil',
         esquema: 'dificil_aeropuerto',
-        enunciado: "Fabricante y modelo de los aviones cuyo fabricante contenga el texto 'Boeing' en cualquier parte del nombre.",
+        enunciado: "Fabricante y nombre del modelo de los modelos de aviones cuyo fabricante contenga el texto 'Boeing' en cualquier parte del nombre.",
         pista: "Rodea la palabra con porcentajes: '%Boeing%'.",
         solucionEsperada: "SELECT fabricante, nombre_modelo FROM modelos_avion WHERE fabricante LIKE '%Boeing%'"
       }
@@ -198,8 +198,9 @@ export const LECCIONES: Leccion[] = [
         esquema: 'facil_biblioteca',
         enunciado: 'Cuenta cuántos libros hay registrados en total en la biblioteca.',
         teoria: 'Las funciones de agregación resumen datos. `COUNT` cuenta filas, `SUM` suma valores numéricos y `AVG` calcula la media.',
-        pista: 'Usa "SELECT COUNT(*) FROM libros".',
-        solucionEsperada: 'SELECT COUNT(*) FROM libros'
+        pista: '¡Simplemente ejecuta, ya está resuelto!',
+        solucionEsperada: 'SELECT COUNT(*) FROM libros',
+        codigoInicial: 'SELECT COUNT(*)\nFROM libros'
       },
       {
         nivel: 2,
@@ -213,9 +214,9 @@ export const LECCIONES: Leccion[] = [
         nivel: 3,
         dificultad: 'Difícil',
         esquema: 'dificil_aeropuerto',
-        enunciado: 'Encuentra cuál es la capacidad máxima de pasajeros del avión más grande de la flota.',
-        pista: 'Usa la función MAX sobre la columna "capacidad_pasajeros".',
-        solucionEsperada: 'SELECT MAX(capacidad_pasajeros) FROM modelos_avion'
+        enunciado: 'Encuentra cuál es la capacidad media de pasajeros de los aviones del fabricante Airbus.',
+        pista: 'Usa la función AVG sobre la columna "capacidad_pasajeros".',
+        solucionEsperada: 'SELECT AVG(capacidad_pasajeros) FROM modelos_avion WHERE fabricante = \'Airbus\''
       }
     ]
   },
@@ -230,7 +231,7 @@ export const LECCIONES: Leccion[] = [
         esquema: 'facil_biblioteca',
         enunciado: 'Muestra el ID de categoría y cuántos libros hay asociados a cada una.',
         teoria: '`GROUP BY` agrupa filas que tienen los mismos valores. Se suele usar junto a funciones como `COUNT` o `SUM` para obtener totales por grupo.',
-        pista: 'Agrupa por la columna "id_categoria".',
+        pista: '¡Simplemente ejecuta, ya está resuelto!',
         solucionEsperada: 'SELECT id_categoria, COUNT(*) FROM libros GROUP BY id_categoria'
       },
       {
@@ -262,7 +263,7 @@ export const LECCIONES: Leccion[] = [
         esquema: 'facil_biblioteca',
         enunciado: 'Muestra el título de cada libro junto al nombre real de su autor.',
         teoria: '`JOIN` une dos tablas. El `INNER JOIN` solo muestra los registros que tienen una coincidencia en ambas tablas mediante una clave común.',
-        pista: 'Une "libros" con "autores" donde id_autor coincida.',
+        pista: '¡Simplemente ejecuta, ya está resuelto!',
         solucionEsperada: 'SELECT libros.titulo, autores.nombre FROM libros INNER JOIN autores ON libros.id_autor = autores.id_autor'
       },
       {
@@ -294,7 +295,7 @@ export const LECCIONES: Leccion[] = [
         esquema: 'facil_biblioteca',
         enunciado: 'Muestra el ID de categoría y cantidad de libros, pero solo para aquellas que tengan más de 1 libro.',
         teoria: '`HAVING` es el "WHERE" de los grupos. Se usa después de un `GROUP BY` para filtrar grupos que cumplen una condición estadística.',
-        pista: 'Añade "HAVING COUNT(*) > 1" después del GROUP BY.',
+        pista: '¡Simplemente ejecuta, ya está resuelto!',
         solucionEsperada: 'SELECT id_categoria, COUNT(*) FROM libros GROUP BY id_categoria HAVING COUNT(*) > 1'
       },
       {
@@ -326,7 +327,7 @@ export const LECCIONES: Leccion[] = [
         esquema: 'facil_biblioteca',
         enunciado: 'Nombre de todos los usuarios y el ID de sus préstamos (deben aparecer incluso si nunca han pedido un libro).',
         teoria: 'El `LEFT JOIN` devuelve todas las filas de la tabla de la izquierda, y las filas coincidentes de la derecha. Si no hay coincidencia, devuelve NULL.',
-        pista: 'Usa LEFT JOIN entre "usuarios" y "prestamos".',
+        pista: '¡Simplemente ejecuta, ya está resuelto!',
         solucionEsperada: 'SELECT usuarios.nombre_completo, prestamos.id_prestamo FROM usuarios LEFT JOIN prestamos ON usuarios.id_usuario = prestamos.id_usuario'
       },
       {
