@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   ReactFlow,
   Background,
@@ -12,7 +12,6 @@ import {
   BackgroundVariant,
   Panel,
   useReactFlow,
-  addEdge,
   reconnectEdge,
   type Connection,
   type Node,
@@ -22,7 +21,7 @@ import {
 import { ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 import '@xyflow/react/dist/style.css';
 
-// 1. FLECHA PERSONALIZADA (Sin puntas de flecha y blindada)
+// 1. FLECHA PERSONALIZADA
 const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style, data }: EdgeProps) => {
   const [edgePath, labelX, labelY] = getSmoothStepPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
   const sourceTable = String(data?.sourceTable || 'Origen');
@@ -30,7 +29,6 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, ta
 
   return (
     <>
-      {/* Forzamos markerEnd y markerStart a undefined para que no dibuje flechas */}
       <BaseEdge id={id} path={edgePath} style={style} markerEnd={undefined} markerStart={undefined} />
       <EdgeLabelRenderer>
         <div style={{ position: 'absolute', transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`, pointerEvents: 'all' }} className="group z-50">
@@ -56,18 +54,14 @@ const TableNode = ({ data }: any) => {
 
   return (
     <div className="bg-[#1e293b] rounded-lg border border-slate-700 shadow-xl overflow-hidden min-w-55 relative group">
-
-      {/* TARGETS (Puntos de ENTRADA) */}
-      <Handle type="target" position={Position.Top} id="t-top" className={dotStyle} />
-      <Handle type="target" position={Position.Right} id="t-right" className={dotStyle} />
-      <Handle type="target" position={Position.Bottom} id="t-bottom" className={dotStyle} />
-      <Handle type="target" position={Position.Left} id="t-left" className={dotStyle} />
-
-      {/* SOURCES (Puntos de SALIDA) */}
-      <Handle type="source" position={Position.Top} id="s-top" className={dotStyle} />
-      <Handle type="source" position={Position.Right} id="s-right" className={dotStyle} />
-      <Handle type="source" position={Position.Bottom} id="s-bottom" className={dotStyle} />
-      <Handle type="source" position={Position.Left} id="s-left" className={dotStyle} />
+      <Handle type="target" position={Position.Top} id="t-top" className={dotStyle} isConnectableStart={false} />
+      <Handle type="target" position={Position.Right} id="t-right" className={dotStyle} isConnectableStart={false} />
+      <Handle type="target" position={Position.Bottom} id="t-bottom" className={dotStyle} isConnectableStart={false} />
+      <Handle type="target" position={Position.Left} id="t-left" className={dotStyle} isConnectableStart={false} />
+      <Handle type="source" position={Position.Top} id="s-top" className={dotStyle} isConnectableStart={false} />
+      <Handle type="source" position={Position.Right} id="s-right" className={dotStyle} isConnectableStart={false} />
+      <Handle type="source" position={Position.Bottom} id="s-bottom" className={dotStyle} isConnectableStart={false} />
+      <Handle type="source" position={Position.Left} id="s-left" className={dotStyle} isConnectableStart={false} />
 
       <div className="bg-slate-800/80 border-b border-slate-700 p-2.5 flex items-center justify-between">
         <span className="font-bold text-blue-300 text-xs tracking-wide uppercase">{data.label}</span>
@@ -90,68 +84,81 @@ const TableNode = ({ data }: any) => {
 
 const nodeTypes = { table: TableNode };
 
-// 3. CONTROLES DE ZOOM
-const ControlesPersonalizados = () => {
+// 3. CONTROLES DE ZOOM Y CENTRADO MANUAL
+const ControlesPersonalizados = ({ nodesCount }: { nodesCount: number }) => {
   const { zoomIn, zoomOut, fitView } = useReactFlow();
+
+  useEffect(() => {
+    if (nodesCount > 0) {
+      window.requestAnimationFrame(() => {
+        fitView({ padding: 0.2, duration: 0 }).catch(() => {});
+      });
+    }
+  }, [nodesCount, fitView]);
+
   return (
     <Panel position="bottom-left" className="flex flex-col gap-1 bg-slate-800 border border-slate-700 rounded-lg p-1 shadow-xl">
       <button onClick={() => zoomIn()} title="Acercar zoom" className="p-1.5 hover:bg-slate-700 rounded cursor-pointer transition-colors group"><ZoomIn className="w-4 h-4 text-slate-400 group-hover:text-white" /></button>
       <button onClick={() => zoomOut()} title="Alejar zoom" className="p-1.5 hover:bg-slate-700 rounded cursor-pointer transition-colors group"><ZoomOut className="w-4 h-4 text-slate-400 group-hover:text-white" /></button>
-      <button onClick={() => fitView({ duration: 800 })} title="Centrar pizarra" className="p-1.5 hover:bg-slate-700 rounded cursor-pointer transition-colors group"><Maximize className="w-4 h-4 text-slate-400 group-hover:text-white" /></button>
+      <button onClick={() => fitView({ padding: 0.2, duration: 500 }).catch(()=>{})} title="Centrar pizarra" className="p-1.5 hover:bg-slate-700 rounded cursor-pointer transition-colors group"><Maximize className="w-4 h-4 text-slate-400 group-hover:text-white" /></button>
     </Panel>
   );
 };
 
 // 4. PIZARRA PRINCIPAL
 export const PizarraInteractiva = ({ estructura, relaciones }: { estructura: any, relaciones: any[] }) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
-  const onReconnect = useCallback(
-    (oldEdge: Edge, newConnection: Connection) => setEdges((els) => reconnectEdge(oldEdge, newConnection, els)),
-    [setEdges]
-  );
-
-  const onConnect = useCallback(
-    (params: Connection) => {
-      setEdges((eds) => addEdge({
-        ...params,
-        type: 'custom',
-        data: { sourceTable: params.source, targetTable: params.target },
-        style: { stroke: '#475569', strokeWidth: 2, opacity: 0.8 }
-      }, eds));
-    },
-    [setEdges]
-  );
-
-  useEffect(() => {
-    // 1. GENERAR NODOS CON DISEÑO EN "ESCALERA"
+  const { initialNodes, initialEdges } = useMemo(() => {
     const newNodes: Node[] = Object.entries(estructura).map(([nombreTabla, columnas], index) => {
-      const x = (index % 3) * 380 + 50;
-      const y = Math.floor(index / 3) * 350 + ((index % 3) * 120) + 50;
+      let posX = (index % 3) * 380 + 50;
+      let posY = Math.floor(index / 3) * 350 + 50;
+
+      const esGimnasio = 'clientes' in estructura;
+      const esAeropuerto = 'vuelos' in estructura;
+
+      if (esGimnasio) {
+        if (nombreTabla === 'clientes') { posX = 0; posY = 0; }
+        else if (nombreTabla === 'entrenadores') { posX = 800; posY = 0; }
+        else if (nombreTabla === 'reservas') { posX = 400; posY = 150; }
+        else if (nombreTabla === 'pagos') { posX = 0; posY = 350; }
+        else if (nombreTabla === 'clases') { posX = 800; posY = 350; }
+      }
+      else if (esAeropuerto) {
+        if (nombreTabla === 'modelos_avion') { posX = 0; posY = 0; }
+        else if (nombreTabla === 'aviones') { posX = 500; posY = 0; }
+        else if (nombreTabla === 'reservas') { posX = 0; posY = 350; }
+        else if (nombreTabla === 'vuelos') { posX = 500; posY = 350; }
+        else if (nombreTabla === 'aeropuertos') { posX = 1050; posY = 350; }
+        else if (nombreTabla === 'pasajeros') { posX = 0; posY = 700; }
+        else if (nombreTabla === 'pilotos') { posX = 500; posY = 700; }
+      }
+      else {
+        if (nombreTabla === 'autores') { posX = 0; posY = 0; }
+        else if (nombreTabla === 'libros') { posX = 400; posY = 0; }
+        else if (nombreTabla === 'categorias') { posX = 800; posY = 0; }
+        else if (nombreTabla === 'usuarios') { posX = 0; posY = 350; }
+        else if (nombreTabla === 'prestamos') { posX = 400; posY = 350; }
+      }
 
       return {
         id: nombreTabla,
         type: 'table',
-        position: { x, y },
+        position: { x: posX, y: posY },
         data: { label: nombreTabla, columns: columnas }
       };
     });
 
-    // 2. ENRUTADOR INTELIGENTE Y REPARTIDOR HÍBRIDO
-    const usedHandles = new Set<string>(); // Aquí guardamos los puntos que ya tienen cable
+    const usedHandles = new Set<string>();
 
-    // Función que busca el primer punto libre basado en una lista de preferencias
     const getBestHandle = (nodeId: string, prefs: string[], isSource: boolean) => {
       const prefix = isSource ? 's-' : 't-';
       for (const p of prefs) {
         const handleId = `${nodeId}-${prefix}${p}`;
         if (!usedHandles.has(handleId)) {
-          usedHandles.add(handleId); // Lo marcamos como ocupado
+          usedHandles.add(handleId);
           return `${prefix}${p}`;
         }
       }
-      // Si por algún casual la tabla tiene más de 4 flechas (todos ocupados), repetimos el primero
       return `${prefix}${prefs[0]}`;
     };
 
@@ -169,28 +176,24 @@ export const PizarraInteractiva = ({ estructura, relaciones }: { estructura: any
         let sourcePrefs: string[] = [];
         let targetPrefs: string[] = [];
 
-        // Calculamos la dirección y montamos las preferencias de mejor a peor
         if (Math.abs(dx) > Math.abs(dy)) {
-          // Separación mayoritariamente Horizontal
-          if (dx > 0) { // Destino a la derecha
+          if (dx > 0) {
             sourcePrefs = dy > 0 ? ['right', 'bottom', 'top', 'left'] : ['right', 'top', 'bottom', 'left'];
             targetPrefs = dy > 0 ? ['left', 'top', 'bottom', 'right'] : ['left', 'bottom', 'top', 'right'];
-          } else { // Destino a la izquierda
+          } else {
             sourcePrefs = dy > 0 ? ['left', 'bottom', 'top', 'right'] : ['left', 'top', 'bottom', 'right'];
             targetPrefs = dy > 0 ? ['right', 'top', 'bottom', 'left'] : ['right', 'bottom', 'top', 'left'];
           }
         } else {
-          // Separación mayoritariamente Vertical
-          if (dy > 0) { // Destino abajo
+          if (dy > 0) {
             sourcePrefs = dx > 0 ? ['bottom', 'right', 'left', 'top'] : ['bottom', 'left', 'right', 'top'];
             targetPrefs = dx > 0 ? ['top', 'left', 'right', 'bottom'] : ['top', 'right', 'left', 'bottom'];
-          } else { // Destino arriba
+          } else {
             sourcePrefs = dx > 0 ? ['top', 'right', 'left', 'bottom'] : ['top', 'left', 'right', 'bottom'];
             targetPrefs = dx > 0 ? ['bottom', 'left', 'right', 'top'] : ['bottom', 'right', 'left', 'top'];
           }
         }
 
-        // Asignamos el mejor punto que esté libre
         sourceHandle = getBestHandle(rel.tabla_origen, sourcePrefs, true);
         targetHandle = getBestHandle(rel.tabla_destino, targetPrefs, false);
       }
@@ -207,9 +210,36 @@ export const PizarraInteractiva = ({ estructura, relaciones }: { estructura: any
       };
     });
 
-    setNodes(newNodes);
-    setEdges(newEdges);
+    return { initialNodes: newNodes, initialEdges: newEdges };
   }, [estructura, relaciones]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialEdges);
+
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    setNodes(initialNodes);
+    setEdges(initialEdges);
+  }, [initialNodes, initialEdges, setNodes, setEdges]);
+
+  const onReconnect = useCallback(
+    (oldEdge: Edge, newConnection: Connection) => {
+      setEdges((els) => reconnectEdge(oldEdge, newConnection, els));
+    },
+    [setEdges]
+  );
+
+  const isValidConnection = useCallback(
+    (params: Edge | Connection) => {
+      return edges.some((e) => e.source === params.source && e.target === params.target);
+    },
+    [edges]
+  );
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
@@ -218,18 +248,18 @@ export const PizarraInteractiva = ({ estructura, relaciones }: { estructura: any
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
         onReconnect={onReconnect}
+        onConnect={undefined}
+        isValidConnection={isValidConnection}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        fitView
         panActivationKeyCode={null}
         colorMode="dark"
         proOptions={{ hideAttribution: true }}
         className="bg-[#0f172a] [&_.react-flow__attribution]:hidden"
       >
         <Background variant={BackgroundVariant.Dots} color="#334155" gap={24} size={1} style={{ backgroundColor: '#0f172a' }} />
-        <ControlesPersonalizados />
+        <ControlesPersonalizados nodesCount={nodes.length} />
       </ReactFlow>
     </div>
   );

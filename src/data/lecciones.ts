@@ -10,6 +10,7 @@ export interface EjercicioLeccion {
   teoria?: string;
   pista: string;
   codigoInicial?: string;
+  ayudaSintaxis?: string;
   solucionEsperada: string;
 }
 
@@ -75,7 +76,8 @@ export const LECCIONES: Leccion[] = [
         esquema: 'medio_gym',
         enunciado: 'Obtén todos los datos de los pagos que superen los 50 euros.',
         pista: 'Recuerda que para seleccionar todos los campos se utiliza el asterisco (*).',
-        solucionEsperada: 'SELECT * FROM pagos WHERE monto > 50'
+        solucionEsperada: 'SELECT * FROM pagos WHERE monto > 50',
+        ayudaSintaxis: 'En SQL, los números se escriben tal cual, sin comillas.',
       },
       {
         nivel: 3,
@@ -84,7 +86,8 @@ export const LECCIONES: Leccion[] = [
         enunciado: 'Busca el nombre completo de los pasajeros que tengan nacionalidad Británica.',
         codigoInicial: 'SELECT nombre_completo\nFROM pasajeros\nWHERE nacionalidad = \'Británica\'',
         pista: "Recuerda poner el texto entre comillas simples: nacionalidad = 'Británica'.",
-        solucionEsperada: "SELECT nombre_completo FROM pasajeros WHERE nacionalidad = 'Británica'"
+        solucionEsperada: "SELECT nombre_completo FROM pasajeros WHERE nacionalidad = 'Británica'",
+        ayudaSintaxis: "En SQL, los textos se escriben entre comillas simples (ej: 'Española')."
       }
     ]
   },

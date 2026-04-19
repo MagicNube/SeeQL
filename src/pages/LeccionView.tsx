@@ -17,7 +17,8 @@ import {
   BookOpen,
   CheckCircle2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Info,
 } from 'lucide-react';
 
 type TabId = 'output' | 'objetivo' | 'pista';
@@ -315,8 +316,23 @@ export function LeccionView() {
                   <ReactMarkdown>{`"${ejercicio.enunciado}"`}</ReactMarkdown>
                </div>
              </div>
+
+             {/* AQUÍ ABRIMOS LA CONDICIÓN PARA QUE SOLO SALGA SI HAY AYUDA */}
+             {ejercicio.ayudaSintaxis && (
+               <div className="mt-4 bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-4 flex items-start gap-3 shadow-md">
+                 <Info className="w-6 h-6 text-indigo-400 shrink-0 mt-0.5" />
+                 <div className="flex-1 min-w-0">
+                   <strong className="text-indigo-300 uppercase tracking-widest text-[11px] font-black block mb-1.5">
+                     Tip de Sintaxis
+                   </strong>
+                   <div className="text-indigo-100 text-lg font-bold leading-snug prose prose-invert prose-p:my-0 prose-code:text-indigo-200 prose-code:bg-indigo-900/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-bold">
+                     <ReactMarkdown>{ejercicio.ayudaSintaxis}</ReactMarkdown>
+                   </div>
+                 </div>
+               </div>
+             )}
+             </div>
           </div>
-        </div>
 
         <div className="bg-[#1e293b] rounded-2xl p-4 border border-slate-700/50 shadow-lg flex flex-col flex-1 min-h-0 relative">
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Editor SQL</label>
