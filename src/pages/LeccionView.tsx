@@ -16,9 +16,6 @@ import {
   ArrowRight,
   BookOpen,
   CheckCircle2,
-  Home,
-  X,
-  Lock,
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
@@ -58,8 +55,7 @@ export function LeccionView() {
   const [columnasEsperadas, setColumnasEsperadas] = useState<string[]>([]);
 
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [ejercicioBloqueada, setEjercicioBloqueada] = useState(false);
-
+  const [isExploring, setIsExploring] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   // 1. Efecto de seguridad (Debe ser el primero)
@@ -103,7 +99,7 @@ export function LeccionView() {
   useEffect(() => {
     setEjercicioActualIdx(0);
     setShowSuccessPopup(false);
-    setEjercicioBloqueada(false);
+    setIsExploring(false);
   }, [leccionId]);
 
   useEffect(() => {
@@ -175,7 +171,7 @@ export function LeccionView() {
     if (ejercicio) {
       setConsulta(ejercicio.codigoInicial || '');
       setIsSuccess(false);
-      setEjercicioBloqueada(false);
+      setIsExploring(false);
       setResultadosQuery([]);
       setColumnasQuery([]);
       setMensajeConsola('El motor está listo. Envía tu consulta SQL para validar el ejercicio.');
@@ -199,7 +195,7 @@ export function LeccionView() {
   };
 
   const ejecutarQuery = async () => {
-    if (!ejercicio || ejercicioBloqueada) return;
+    if (!ejercicio || isExploring) return;
 
     if (!consulta.trim()) {
     setMensajeConsola('La consulta está vacía. Escribe tu código SQL antes de validar.');
@@ -257,7 +253,7 @@ export function LeccionView() {
     const nextLeccion = LECCIONES.find(l => l.id === leccionId + 1);
     setEjercicioActualIdx(0);
     setShowSuccessPopup(false);
-    setEjercicioBloqueada(false);
+    setIsExploring(false);
 
     if (nextLeccion) {
         navigate(`/lecciones/${nextLeccion.id}`);
@@ -282,15 +278,6 @@ export function LeccionView() {
       <aside style={{ width: `${sidebarWidth}px` }} className="flex flex-col gap-4 shrink-0 h-full">
 
         <div className="bg-[#1e293b] rounded-2xl p-6 border border-slate-700/50 shadow-lg flex flex-col shrink-0 max-h-[60%] overflow-auto custom-scrollbar relative">
-
-          {ejercicioBloqueada && (
-            <div className="absolute inset-0 bg-[#1e293b]/50 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-2xl border border-emerald-500/30">
-               <div className="bg-slate-900/90 px-4 py-2 rounded-full border border-slate-700 text-emerald-400 text-xs font-bold tracking-widest uppercase flex items-center gap-2 shadow-xl">
-                 <CheckCircle2 className="w-4 h-4"/> Ejercicio Completado
-               </div>
-            </div>
-          )}
-
           <div className="flex justify-between items-center mb-5">
             <span className="text-xs font-black uppercase tracking-[0.2em] text-blue-400">Ejercicio Actual</span>
             <span className="text-sm font-black bg-blue-600/30 text-blue-200 px-4 py-1.5 rounded-xl border border-blue-400/30 shadow-md">
@@ -300,7 +287,7 @@ export function LeccionView() {
 
           <h2 className="text-white font-black text-2xl mb-6 flex items-center gap-3">
           <BookOpen className="w-6 h-6 text-blue-500" /> Lección {leccion.id}. {leccion.titulo}
-        </h2>
+          </h2>
 
           {ejercicio.teoria && (
             <div className="mb-6">
@@ -332,46 +319,50 @@ export function LeccionView() {
         </div>
 
         <div className="bg-[#1e293b] rounded-2xl p-4 border border-slate-700/50 shadow-lg flex flex-col flex-1 min-h-0 relative">
-          {ejercicioBloqueada && (
-            <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-[1px] z-10 rounded-2xl flex flex-col items-center justify-center border border-slate-700/50">
-               <Lock className="w-8 h-8 text-slate-500 mb-2"/>
-               <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">Editor Bloqueado</span>
-            </div>
-          )}
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Editor SQL</label>
           <div className="flex-1 rounded-lg overflow-hidden border border-slate-800">
             <SqlEditor
-            value={consulta}
-            onChange={(val) => setConsulta(val || '')}
-            estructura={estructuraActual}
-          />
+              value={consulta}
+              onChange={(val) => setConsulta(val || '')}
+              estructura={estructuraActual}
+            />
           </div>
         </div>
 
-        <div className="flex gap-3 shrink-0">
-          <button
-             onClick={() => setConsulta(ejercicio.codigoInicial || '')}
-             disabled={ejercicioBloqueada}
-             className="p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all active:scale-95 border border-slate-700 cursor-pointer shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-             title="Restaurar editor"
-          >
-             <RotateCcw className="w-5 h-5" />
-          </button>
+        <div className="flex flex-col gap-2 shrink-0">
+          <div className="flex gap-2">
+            <button
+               onClick={() => setConsulta(ejercicio.codigoInicial || '')}
+               className="p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all active:scale-95 border border-slate-700 cursor-pointer shadow-md"
+               title="Restaurar editor"
+            >
+               <RotateCcw className="w-5 h-5" />
+            </button>
 
-          {ejercicioBloqueada ? (
-              <button
-                onClick={() => setShowSuccessPopup(true)}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider text-sm"
-              >
-                Continuar <ArrowRight className="w-4 h-4"/>
-              </button>
-          ) : (
-              <button
-                onClick={ejecutarQuery}
-                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider text-sm"
-              >
-                EJECUTAR Y VALIDAR
-              </button>
+            {/* El botón azul siempre es el primario */}
+            <button
+              onClick={ejecutarQuery}
+              className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider text-sm"
+            >
+              {isExploring ? 'VOLVER A EJECUTAR' : 'EJECUTAR Y VALIDAR'}
+            </button>
+          </div>
+
+          {/* El botón de avanzar aparece debajo, grande y llamativo */}
+          {isExploring && (
+             <button
+               onClick={() => {
+                 if (ejercicioActualIdx < leccion.ejercicios.length - 1) {
+                    setEjercicioActualIdx(f => f + 1);
+                    setIsExploring(false);
+                 } else {
+                    finalizarLeccion();
+                 }
+               }}
+               className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider text-sm shadow-[0_0_20px_-5px_rgba(16,185,129,0.4)] animate-pulse"
+             >
+               {ejercicioActualIdx < leccion.ejercicios.length - 1 ? 'Pasar al Siguiente Ejercicio' : 'Finalizar Lección'} <ArrowRight className="w-4 h-4"/>
+             </button>
           )}
         </div>
       </aside>
@@ -475,53 +466,49 @@ export function LeccionView() {
       )}
 
       {showSuccessPopup && (
-  <div className="fixed bottom-8 right-8 z-50 w-full max-w-sm animate-in slide-in-from-right-full duration-500 ease-out">
-    <div className="relative overflow-hidden bg-slate-900 border border-emerald-500/40 p-6 rounded-3xl shadow-[0_20px_50px_-10px_rgba(16,185,129,0.3)] ring-1 ring-emerald-500/20">
-      {/* Línea decorativa superior */}
-      <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent"></div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 animate-in fade-in duration-300 pointer-events-none">
+          <div className="relative overflow-hidden bg-slate-900 border border-emerald-500/40 p-8 sm:p-10 rounded-[2.5rem] shadow-[0_0_80px_-15px_rgba(16,185,129,0.5)] max-w-md w-full text-center animate-in zoom-in-95 duration-300 pointer-events-auto">
+            <div className="absolute top-0 inset-x-0 h-1.5 bg-linear-to-r from-transparent via-emerald-500 to-transparent opacity-70"></div>
 
-      <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center shadow-inner">
-          <CheckCircle2 className="w-7 h-7 text-emerald-400" />
-        </div>
+            <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-emerald-500/5 shadow-inner">
+                <CheckCircle2 className="w-10 h-10 text-emerald-400" />
+            </div>
 
-        <div className="flex-1">
-          <h3 className="text-xl font-black text-white mb-1 tracking-tight">¡Misión Cumplida!</h3>
-          <p className="text-slate-400 text-sm leading-snug mb-4">
-            {ejercicioActualIdx < leccion.ejercicios.length - 1
-              ? `Has superado el ejercicio ${ejercicioActualIdx + 1}.`
-              : '¡Has completado toda la lección!'}
-          </p>
+            <h3 className="text-2xl font-black text-white mb-4 tracking-tight">¡Misión Cumplida!</h3>
 
-          <div className="flex gap-2">
-            {ejercicioActualIdx < leccion.ejercicios.length - 1 ? (
+            <p className="text-slate-300 mb-8 text-sm leading-relaxed">
+              {ejercicioActualIdx < leccion.ejercicios.length - 1
+                ? `Has superado el ejercicio ${ejercicioActualIdx + 1} correctamente.`
+                : '¡Has completado toda la lección!'}
+            </p>
+
+            <div className="flex flex-col gap-3">
+              {ejercicioActualIdx < leccion.ejercicios.length - 1 ? (
+                <button
+                  onClick={() => { setShowSuccessPopup(false); setEjercicioActualIdx(f => f + 1); setIsExploring(false); }}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer uppercase text-xs tracking-widest"
+                >
+                  Siguiente Ejercicio <ArrowRight className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  onClick={finalizarLeccion}
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer uppercase text-xs tracking-widest"
+                >
+                  Finalizar Lección <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
+
               <button
-                onClick={() => { setShowSuccessPopup(false); setEjercicioActualIdx(f => f + 1); }}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs uppercase tracking-wider"
+                onClick={() => { setShowSuccessPopup(false); setIsExploring(true); }}
+                className="text-slate-400 hover:text-white mt-2 text-xs font-bold uppercase tracking-widest transition-colors py-2 cursor-pointer"
               >
-                Siguiente <ArrowRight className="w-4 h-4" />
+                Quedarme explorando
               </button>
-            ) : (
-              <button
-                onClick={finalizarLeccion}
-                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs uppercase tracking-wider"
-              >
-                Finalizar <ArrowRight className="w-4 h-4" />
-              </button>
-            )}
-            <button
-              onClick={() => { setShowSuccessPopup(false); setEjercicioBloqueada(true); }}
-              className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-xl border border-slate-700 transition-colors"
-              title="Cerrar y revisar"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 }
