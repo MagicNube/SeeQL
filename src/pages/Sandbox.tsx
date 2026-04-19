@@ -99,7 +99,7 @@ export function Sandbox() {
         const nuevosDatosPreview: Record<string, any[]> = {};
         await Promise.all(
           tablas.map(async (tabla) => {
-            const { data } = await supabase.schema(esquemaActivo).from(tabla).select('*').limit(5);
+            const { data } = await supabase.schema(esquemaActivo).from(tabla).select('*');
             nuevosDatosPreview[tabla] = data || [];
           })
         );

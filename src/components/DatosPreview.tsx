@@ -203,7 +203,7 @@ export const DatosPreview: React.FC<DatosPreviewProps> = ({ query, tables }) => 
   const isTargetTable = activeTables.some(at => at.toLowerCase() === table.tableName.toLowerCase());
   const isFocused = focusedTable === table.tableName; // <--- Detectamos si esta es la tabla ampliada
 
-  const VISIBLE_ROWS = 5;
+  const VISIBLE_ROWS = 10;
   const rowsToRender = table.normalizedRows.slice(0, VISIBLE_ROWS);
   const hiddenRowsCount = table.normalizedRows.length - VISIBLE_ROWS;
 

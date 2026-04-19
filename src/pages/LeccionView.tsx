@@ -147,7 +147,7 @@ export function LeccionView() {
         const tablas = Object.keys(estructura || {});
         const nuevosDatos: Record<string, Record<string, any>[]> = {};
         await Promise.all(tablas.map(async (t) => {
-          const { data } = await supabase.schema(ejercicio.esquema).from(t).select('*').limit(5);
+          const { data } = await supabase.schema(ejercicio.esquema).from(t).select('*');
           nuevosDatos[t] = data || [];
         }));
         if (isCancelled) return;

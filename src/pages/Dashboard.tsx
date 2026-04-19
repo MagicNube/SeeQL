@@ -92,7 +92,6 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* Footer de progreso */}
         {/* Footer de progreso - Versión Ampliada */}
 {user && (
   <div className="mt-16 flex justify-center animate-in fade-in slide-in-from-bottom-6 duration-1000">
