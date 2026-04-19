@@ -125,19 +125,82 @@ export const PizarraInteractiva = ({ estructura, relaciones }: { estructura: any
   );
 
   useEffect(() => {
+    // 1. GENERAR NODOS CON DISEÑO EN "ESCALERA"
     const newNodes: Node[] = Object.entries(estructura).map(([nombreTabla, columnas], index) => {
-      const x = (index % 3) * 350 + 50;
-      const y = Math.floor(index / 3) * 300 + 50;
-      return { id: nombreTabla, type: 'table', position: { x, y }, data: { label: nombreTabla, columns: columnas } };
+      const x = (index % 3) * 380 + 50;
+      const y = Math.floor(index / 3) * 350 + ((index % 3) * 120) + 50;
+
+      return {
+        id: nombreTabla,
+        type: 'table',
+        position: { x, y },
+        data: { label: nombreTabla, columns: columnas }
+      };
     });
 
+    // 2. ENRUTADOR INTELIGENTE Y REPARTIDOR HÍBRIDO
+    const usedHandles = new Set<string>(); // Aquí guardamos los puntos que ya tienen cable
+
+    // Función que busca el primer punto libre basado en una lista de preferencias
+    const getBestHandle = (nodeId: string, prefs: string[], isSource: boolean) => {
+      const prefix = isSource ? 's-' : 't-';
+      for (const p of prefs) {
+        const handleId = `${nodeId}-${prefix}${p}`;
+        if (!usedHandles.has(handleId)) {
+          usedHandles.add(handleId); // Lo marcamos como ocupado
+          return `${prefix}${p}`;
+        }
+      }
+      // Si por algún casual la tabla tiene más de 4 flechas (todos ocupados), repetimos el primero
+      return `${prefix}${prefs[0]}`;
+    };
+
     const newEdges: Edge[] = relaciones.map((rel, idx) => {
+      const sourceNode = newNodes.find(n => n.id === rel.tabla_origen);
+      const targetNode = newNodes.find(n => n.id === rel.tabla_destino);
+
+      let sourceHandle = 's-bottom';
+      let targetHandle = 't-top';
+
+      if (sourceNode && targetNode) {
+        const dx = targetNode.position.x - sourceNode.position.x;
+        const dy = targetNode.position.y - sourceNode.position.y;
+
+        let sourcePrefs: string[] = [];
+        let targetPrefs: string[] = [];
+
+        // Calculamos la dirección y montamos las preferencias de mejor a peor
+        if (Math.abs(dx) > Math.abs(dy)) {
+          // Separación mayoritariamente Horizontal
+          if (dx > 0) { // Destino a la derecha
+            sourcePrefs = dy > 0 ? ['right', 'bottom', 'top', 'left'] : ['right', 'top', 'bottom', 'left'];
+            targetPrefs = dy > 0 ? ['left', 'top', 'bottom', 'right'] : ['left', 'bottom', 'top', 'right'];
+          } else { // Destino a la izquierda
+            sourcePrefs = dy > 0 ? ['left', 'bottom', 'top', 'right'] : ['left', 'top', 'bottom', 'right'];
+            targetPrefs = dy > 0 ? ['right', 'top', 'bottom', 'left'] : ['right', 'bottom', 'top', 'left'];
+          }
+        } else {
+          // Separación mayoritariamente Vertical
+          if (dy > 0) { // Destino abajo
+            sourcePrefs = dx > 0 ? ['bottom', 'right', 'left', 'top'] : ['bottom', 'left', 'right', 'top'];
+            targetPrefs = dx > 0 ? ['top', 'left', 'right', 'bottom'] : ['top', 'right', 'left', 'bottom'];
+          } else { // Destino arriba
+            sourcePrefs = dx > 0 ? ['top', 'right', 'left', 'bottom'] : ['top', 'left', 'right', 'bottom'];
+            targetPrefs = dx > 0 ? ['bottom', 'left', 'right', 'top'] : ['bottom', 'right', 'left', 'top'];
+          }
+        }
+
+        // Asignamos el mejor punto que esté libre
+        sourceHandle = getBestHandle(rel.tabla_origen, sourcePrefs, true);
+        targetHandle = getBestHandle(rel.tabla_destino, targetPrefs, false);
+      }
+
       return {
         id: `edge-${rel.tabla_origen}-${rel.tabla_destino}-${idx}`,
         source: rel.tabla_origen,
-        sourceHandle: 's-bottom',
+        sourceHandle: sourceHandle,
         target: rel.tabla_destino,
-        targetHandle: 't-top',
+        targetHandle: targetHandle,
         type: 'custom',
         data: { sourceTable: rel.tabla_origen, targetTable: rel.tabla_destino },
         style: { stroke: '#475569', strokeWidth: 2, opacity: 0.8 },

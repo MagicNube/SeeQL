@@ -47,7 +47,7 @@ export function LeccionView() {
 
   const [sidebarWidth, setSidebarWidth] = useState<number>(450);
   const [isResizing, setIsResizing] = useState<boolean>(false);
-  const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(true);
+  const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(false);
 
   const [resultadosQuery, setResultadosQuery] = useState<Record<string, any>[]>([]);
   const [columnasQuery, setColumnasQuery] = useState<string[]>([]);
@@ -155,6 +155,7 @@ export function LeccionView() {
       setResultadosQuery([]);
       setColumnasQuery([]);
       setMensajeConsola('El motor está listo. Envía tu consulta SQL para validar el ejercicio.');
+      setIsConsoleOpen(false);
       cargarTodo();
     }
 
@@ -304,7 +305,11 @@ export function LeccionView() {
           )}
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Editor SQL</label>
           <div className="flex-1 rounded-lg overflow-hidden border border-slate-800">
-            <SqlEditor value={consulta} onChange={(val) => setConsulta(val || '')} />
+            <SqlEditor
+            value={consulta}
+            onChange={(val) => setConsulta(val || '')}
+            estructura={estructuraActual}
+          />
           </div>
         </div>
 

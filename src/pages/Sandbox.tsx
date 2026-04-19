@@ -165,7 +165,11 @@ export function Sandbox() {
         <div className="bg-[#1e293b] rounded-2xl p-4 border border-slate-700/50 shadow-lg flex flex-col flex-1 min-h-0">
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Editor SQL</label>
           <div className="flex-1 rounded-lg overflow-hidden border border-slate-800 bg-[#1e1e1e]">
-            <SqlEditor value={consulta} onChange={(val) => setConsulta(val || '')} />
+            <SqlEditor
+              value={consulta}
+              onChange={(val) => setConsulta(val || '')}
+              estructura={estructuraActual}
+            />
           </div>
         </div>
 
