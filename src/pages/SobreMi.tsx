@@ -36,7 +36,7 @@ export const SobreMi = () => {
                   <Github className="w-5 h-5" />
                 </a>
                 <a
-                  href="mailto:tu-correo@ejemplo.com"
+                  href="mailto:jesus.caravaca@protonmail.com"
                   className="p-2 bg-slate-700/50 hover:bg-slate-700 text-white rounded-xl transition-all cursor-pointer"
                 >
                   <Mail className="w-5 h-5" />
