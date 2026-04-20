@@ -236,7 +236,7 @@ export const DatosPreviewContent: React.FC<DatosPreviewProps> = ({ query, tables
         else if (table.tableName === 'libros') { posX = 0; posY = 0; }
         else if (table.tableName === 'categorias') { posX = 1150; posY = 550; }
         else if (table.tableName === 'usuarios') { posX = 550; posY = 550; }
-        else if (table.tableName === 'prestamos') { posX = 850; posY = 200; }
+        else if (table.tableName === 'prestamos') { posX = 900; posY = 200; }
       }
 
       // Guardamos la posición más baja para el JOIN/GROUP BY posterior
@@ -248,9 +248,8 @@ export const DatosPreviewContent: React.FC<DatosPreviewProps> = ({ query, tables
       const rowsToRender = table.normalizedRows.slice(0, VISIBLE_ROWS);
       const hiddenRowsCount = table.normalizedRows.length - VISIBLE_ROWS;
 const content = (
-        <div className={`w-max min-w-[320px] max-w-[800px] bg-[#1e293b] rounded-xl border transition-all duration-300
-          ${isTargetTable ? 'border-blue-500 shadow-[0_0_30px_-5px_rgba(59,130,246,0.4)] scale-[1.02]' : 'border-slate-700 opacity-70'}`}>
-
+        <div className={`w-max min-w-[320px] bg-[#1e293b] rounded-xl border transition-all duration-300 ...
+        ${isTargetTable ? 'border-blue-500 shadow-[0_0_30px_-5px_rgba(59,130,246,0.4)] scale-[1.02]' : 'border-slate-700 opacity-70'}`}>
           <div className={`border-b border-slate-700 p-3 flex items-center justify-between
             ${isTargetTable ? 'bg-blue-900/30' : 'bg-slate-800/80'}`}>
             <div className="flex items-center gap-3">
@@ -347,7 +346,7 @@ const content = (
       const posY = baseVirtualY;
 
       const content = (
-        <div className="w-max min-w-[500px] max-w-[1000px] bg-[#1e293b] rounded-xl border border-fuchsia-500 shadow-[0_0_40px_-10px_rgba(217,70,239,0.3)] overflow-hidden scale-[1.05]">
+        <div className="w-max min-w-[500px] bg-[#1e293b] rounded-xl border border-fuchsia-500 shadow-[0_0_40px_-10px_rgba(217,70,239,0.3)] overflow-hidden scale-[1.05]">
            <div className="bg-fuchsia-900/30 border-b border-fuchsia-500/30 p-3 flex items-center justify-between">
               <span className="font-black text-fuchsia-300 text-sm tracking-wide uppercase">
                 {mergedTable.tableName || 'Resultado Fusión'}
@@ -439,7 +438,7 @@ const content = (
       const posY = mergedTable ? baseVirtualY + 350 : baseVirtualY;
 
       const content = (
-        <div className="w-max min-w-[350px] max-w-[800px] bg-[#1e293b] rounded-xl border border-orange-500 shadow-[0_0_40px_-10px_rgba(249,115,22,0.3)] overflow-hidden scale-[1.05]">
+        <div className="w-max min-w-[350px] bg-[#1e293b] rounded-xl border border-orange-500 shadow-[0_0_40px_-10px_rgba(249,115,22,0.3)] overflow-hidden scale-[1.05]">
            <div className="bg-orange-900/30 border-b border-orange-500/30 p-3 flex items-center justify-between">
               <span className="font-black text-orange-300 text-sm tracking-wide uppercase flex items-center gap-2">
                 <Layers className="w-5 h-5"/> {groupedTable.tableName || 'Agrupación Final'}
