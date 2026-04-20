@@ -46,6 +46,7 @@ export function LeccionView() {
   const [sidebarWidth, setSidebarWidth] = useState<number>(450);
   const [isResizing, setIsResizing] = useState<boolean>(false);
   const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(false);
+  const [isEnunciadoOpen, setIsEnunciadoOpen] = useState<boolean>(true);
 
   const [resultadosQuery, setResultadosQuery] = useState<Record<string, any>[]>([]);
   const [columnasQuery, setColumnasQuery] = useState<string[]>([]);
@@ -278,61 +279,75 @@ export function LeccionView() {
 
       <aside style={{ width: `${sidebarWidth}px` }} className="flex flex-col gap-4 shrink-0 h-full">
 
-        <div className="bg-[#1e293b] rounded-2xl p-6 border border-slate-700/50 shadow-lg flex flex-col shrink-0 max-h-[60%] overflow-auto custom-scrollbar relative">
-          <div className="flex justify-between items-center mb-5">
-            <span className="text-xs font-black uppercase tracking-[0.2em] text-blue-400">Ejercicio Actual</span>
-            <span className="text-sm font-black bg-blue-600/30 text-blue-200 px-4 py-1.5 rounded-xl border border-blue-400/30 shadow-md">
-              {ejercicioActualIdx + 1} de {leccion.ejercicios.length}
-            </span>
+        {/* PANEL DEL ENUNCIADO PLEGABLE */}
+        <div className={`bg-[#1e293b] rounded-2xl p-6 border border-slate-700/50 shadow-lg flex flex-col shrink-0 transition-all duration-300 ${isEnunciadoOpen ? 'max-h-[60%] overflow-auto custom-scrollbar' : 'overflow-hidden'}`}>
+          <div className={`flex justify-between items-center ${isEnunciadoOpen ? 'mb-5' : ''}`}>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-black uppercase tracking-[0.2em] text-blue-400">Ejercicio Actual</span>
+              <span className="text-sm font-black bg-blue-600/30 text-blue-200 px-4 py-1.5 rounded-xl border border-blue-400/30 shadow-md">
+                {ejercicioActualIdx + 1} de {leccion.ejercicios.length}
+              </span>
+            </div>
+
+            <button
+              onClick={() => setIsEnunciadoOpen(!isEnunciadoOpen)}
+              className="p-1.5 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title={isEnunciadoOpen ? "Minimizar enunciado" : "Expandir enunciado"}
+            >
+              {isEnunciadoOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </button>
           </div>
 
-          <h2 className="text-white font-black text-2xl mb-6 flex items-center gap-3">
-          <BookOpen className="w-6 h-6 text-blue-500" /> Lección {leccion.id}. {leccion.titulo}
-          </h2>
+          {isEnunciadoOpen && (
+            <div className="animate-in fade-in duration-300 flex flex-col">
+              <h2 className="text-white font-black text-2xl mb-6 flex items-center gap-3">
+                <BookOpen className="w-6 h-6 text-blue-500" /> Lección {leccion.id}. {leccion.titulo}
+              </h2>
 
-          {ejercicio.teoria && (
-            <div className="mb-6">
-              <h3 className="text-[14px] font-bold uppercase tracking-widest text-white mb-2 flex items-center gap-2">
-                 Explicación
-              </h3>
-              <div className="text-white text-base leading-relaxed prose prose-invert prose-p:my-1 prose-code:text-blue-300 prose-code:bg-blue-900/20 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md max-w-none">
-                <ReactMarkdown>{ejercicio.teoria}</ReactMarkdown>
+              {ejercicio.teoria && (
+                <div className="mb-6">
+                  <h3 className="text-[14px] font-bold uppercase tracking-widest text-white mb-2 flex items-center gap-2">
+                    Explicación
+                  </h3>
+                  <div className="text-white text-base leading-relaxed prose prose-invert prose-p:my-1 prose-code:text-blue-300 prose-code:bg-blue-900/20 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md max-w-none">
+                    <ReactMarkdown>{ejercicio.teoria}</ReactMarkdown>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-auto">
+                <h3 className="text-[14px] font-bold uppercase tracking-widest text-blue-400 mb-2 flex items-center gap-2">
+                    {ejercicioActualIdx === 0 ? 'Enunciado Resuelto' : 'Enunciado a resolver'}
+                </h3>
+                {ejercicioActualIdx === 0 && (
+                    <p className="text-base text-blue-400 mb-3 font-medium italic">
+                      Explora las tablas hasta familiarizarte con las tablas.
+                    </p>
+                )}
+                <div className="bg-blue-500/10 border-l-4 border-blue-500 p-5 rounded-r-xl shadow-inner relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                  <div className="text-blue-100 text-lg font-bold italic leading-snug relative z-10 prose prose-invert prose-p:my-0 prose-strong:text-blue-300 prose-code:text-blue-200 prose-code:bg-blue-900/30 prose-code:px-1 prose-code:rounded">
+                      <ReactMarkdown>{`"${ejercicio.enunciado}"`}</ReactMarkdown>
+                  </div>
+                </div>
+
+                {ejercicio.ayudaSintaxis && (
+                  <div className="mt-4 bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-4 flex items-start gap-3 shadow-md">
+                    <Info className="w-6 h-6 text-indigo-400 shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <strong className="text-indigo-300 uppercase tracking-widest text-[11px] font-black block mb-1.5">
+                        Tip de Sintaxis
+                      </strong>
+                      <div className="text-indigo-100 text-lg font-bold leading-snug prose prose-invert prose-p:my-0 prose-code:text-indigo-200 prose-code:bg-indigo-900/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-bold">
+                        <ReactMarkdown>{ejercicio.ayudaSintaxis}</ReactMarkdown>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
-
-          <div className="mt-auto">
-             <h3 className="text-[14px] font-bold uppercase tracking-widest text-blue-400 mb-2 flex items-center gap-2">
-                {ejercicioActualIdx === 0 ? 'Enunciado Resuelto' : 'Enunciado a resolver'}
-             </h3>
-             {ejercicioActualIdx === 0 && (
-                <p className="text-base text-blue-400 mb-3 font-medium italic">
-                  Explora las tablas hasta familiarizarte con las tablas.
-                </p>
-             )}
-             <div className="bg-blue-500/10 border-l-4 border-blue-500 p-5 rounded-r-xl shadow-inner relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
-               <div className="text-blue-100 text-lg font-bold italic leading-snug relative z-10 prose prose-invert prose-p:my-0 prose-strong:text-blue-300 prose-code:text-blue-200 prose-code:bg-blue-900/30 prose-code:px-1 prose-code:rounded">
-                  <ReactMarkdown>{`"${ejercicio.enunciado}"`}</ReactMarkdown>
-               </div>
-             </div>
-
-             {/* AQUÍ ABRIMOS LA CONDICIÓN PARA QUE SOLO SALGA SI HAY AYUDA */}
-             {ejercicio.ayudaSintaxis && (
-               <div className="mt-4 bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-4 flex items-start gap-3 shadow-md">
-                 <Info className="w-6 h-6 text-indigo-400 shrink-0 mt-0.5" />
-                 <div className="flex-1 min-w-0">
-                   <strong className="text-indigo-300 uppercase tracking-widest text-[11px] font-black block mb-1.5">
-                     Tip de Sintaxis
-                   </strong>
-                   <div className="text-indigo-100 text-lg font-bold leading-snug prose prose-invert prose-p:my-0 prose-code:text-indigo-200 prose-code:bg-indigo-900/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-bold">
-                     <ReactMarkdown>{ejercicio.ayudaSintaxis}</ReactMarkdown>
-                   </div>
-                 </div>
-               </div>
-             )}
-             </div>
-          </div>
+        </div>
 
         <div className="bg-[#1e293b] rounded-2xl p-4 border border-slate-700/50 shadow-lg flex flex-col flex-1 min-h-0 relative">
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Editor SQL</label>
@@ -501,7 +516,7 @@ export function LeccionView() {
             <div className="flex flex-col gap-3">
               {ejercicioActualIdx < leccion.ejercicios.length - 1 ? (
                 <button
-                  onClick={() => { setShowSuccessPopup(false); setEjercicioActualIdx(f => f + 1); setIsExploring(false); }}
+                  onClick={() => { setShowSuccessPopup(false); setEjercicioActualIdx(f => f + 1); setIsExploring(false); setIsEnunciadoOpen(true); } }
                   className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer uppercase text-xs tracking-widest"
                 >
                   Siguiente Ejercicio <ArrowRight className="w-4 h-4" />
