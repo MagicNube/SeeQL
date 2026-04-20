@@ -346,7 +346,7 @@ const content = (
       const posY = baseVirtualY;
 
       const content = (
-        <div className="w-max min-w-[500px] bg-[#1e293b] rounded-xl border border-fuchsia-500 shadow-[0_0_40px_-10px_rgba(217,70,239,0.3)] overflow-hidden scale-[1.05]">
+        <div className="w-max min-w-125 bg-[#1e293b] rounded-xl border border-fuchsia-500 shadow-[0_0_40px_-10px_rgba(217,70,239,0.3)] overflow-hidden scale-[1.05]">
            <div className="bg-fuchsia-900/30 border-b border-fuchsia-500/30 p-3 flex items-center justify-between">
               <span className="font-black text-fuchsia-300 text-sm tracking-wide uppercase">
                 {mergedTable.tableName || 'Resultado Fusión'}
@@ -438,7 +438,7 @@ const content = (
       const posY = mergedTable ? baseVirtualY + 350 : baseVirtualY;
 
       const content = (
-        <div className="w-max min-w-[350px] bg-[#1e293b] rounded-xl border border-orange-500 shadow-[0_0_40px_-10px_rgba(249,115,22,0.3)] overflow-hidden scale-[1.05]">
+        <div className="w-max min-w-87.5 bg-[#1e293b] rounded-xl border border-orange-500 shadow-[0_0_40px_-10px_rgba(249,115,22,0.3)] overflow-hidden scale-[1.05]">
            <div className="bg-orange-900/30 border-b border-orange-500/30 p-3 flex items-center justify-between">
               <span className="font-black text-orange-300 text-sm tracking-wide uppercase flex items-center gap-2">
                 <Layers className="w-5 h-5"/> {groupedTable.tableName || 'Agrupación Final'}
@@ -551,8 +551,8 @@ const content = (
 
       {/* Banner de aviso controlado por el estado showNotification */}
       {showNotification && (mergedTable || groupedTable) && (
-        <div className="absolute top-6 left-6 z-[100] animate-in fade-in slide-in-from-left-4 duration-500">
-          <div className="flex flex-col gap-3 bg-slate-900/95 backdrop-blur-md border border-fuchsia-500/50 p-4 rounded-2xl shadow-2xl max-w-[280px] relative overflow-hidden">
+        <div className="absolute top-6 left-6 z-100 animate-in fade-in slide-in-from-left-4 duration-500">
+          <div className="flex flex-col gap-3 bg-slate-900/95 backdrop-blur-md border border-fuchsia-500/50 p-4 rounded-2xl shadow-2xl max-w-70 relative overflow-hidden">
 
             {/* BOTÓN X: Ahora es una X real y más visible */}
             <button
