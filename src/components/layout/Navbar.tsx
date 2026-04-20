@@ -9,8 +9,10 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const isLanding = location.pathname === '/';
 
-  const [lang, setLang] = useState<'ES' | 'EN'>('ES');
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [lang] = useState<'ES' | 'EN'>('ES');
+  const [theme] = useState<'dark' | 'light'>('dark');
+
+  const [mensajeProximamente, setMensajeProximamente] = useState<string | null>(null);
 
   const handleSignOut = async () => {
     try {
@@ -21,6 +23,11 @@ export const Navbar = () => {
     }
   };
 
+  const mostrarAviso = (texto: string) => {
+    setMensajeProximamente(texto);
+    setTimeout(() => setMensajeProximamente(null), 3000);
+  };
+
   return (
     <nav className="bg-[#0f172a]/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,7 +35,8 @@ export const Navbar = () => {
 
           {/* LOGO - Redirige a / */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="bg-gradient-to-tr from-blue-600 to-cyan-500 p-2 rounded-xl group-hover:rotate-12 group-hover:scale-105 transition-all shadow-lg shadow-blue-500/20">
+            {/* FIX 3: bg-gradient-to-tr -> bg-linear-to-tr */}
+            <div className="bg-linear-to-tr from-blue-600 to-cyan-500 p-2 rounded-xl group-hover:rotate-12 group-hover:scale-105 transition-all shadow-lg shadow-blue-500/20">
               <Database className="h-5 w-5 text-white" />
             </div>
             <span className="text-xl font-bold text-white tracking-tight">SeeQL</span>
@@ -64,11 +72,11 @@ export const Navbar = () => {
           </div>
 
           {/* ACCIONES DERECHA */}
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 relative">
 
             <div className="flex items-center bg-slate-800/50 rounded-lg p-1 border border-slate-700">
               <button
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                onClick={() => mostrarAviso("Tema claro disponible pronto")}
                 className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-700 transition-colors cursor-pointer"
                 title="Cambiar tema"
               >
@@ -78,7 +86,7 @@ export const Navbar = () => {
               <div className="w-px h-4 bg-slate-700 mx-1"></div>
 
               <button
-                onClick={() => setLang(lang === 'ES' ? 'EN' : 'ES')}
+                onClick={() => mostrarAviso("Soporte multi-idioma en desarrollo")}
                 className="flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors px-2 py-1.5 rounded-md hover:bg-slate-700 select-none cursor-pointer"
               >
                 <Globe className="w-4 h-4" />
@@ -118,6 +126,12 @@ export const Navbar = () => {
           </div>
         </div>
       </div>
+
+      {mensajeProximamente && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-slate-800/90 backdrop-blur-sm border border-blue-500/50 text-blue-400 text-[11px] font-bold uppercase tracking-widest px-5 py-2.5 rounded-xl shadow-[0_0_20px_-5px_rgba(59,130,246,0.3)] animate-in fade-in zoom-in-95 slide-in-from-top-4 duration-300 z-100 pointer-events-none">
+          {mensajeProximamente}
+        </div>
+      )}
     </nav>
   );
 };
