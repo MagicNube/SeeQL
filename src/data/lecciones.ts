@@ -84,7 +84,6 @@ export const LECCIONES: Leccion[] = [
         dificultad: 'Difícil',
         esquema: 'dificil_aeropuerto',
         enunciado: 'Busca el nombre completo de los pasajeros que tengan nacionalidad Británica.',
-        codigoInicial: 'SELECT nombre_completo\nFROM pasajeros\nWHERE nacionalidad = \'Británica\'',
         pista: "Recuerda poner el texto entre comillas simples: nacionalidad = 'Británica'.",
         solucionEsperada: "SELECT nombre_completo FROM pasajeros WHERE nacionalidad = 'Británica'",
         ayudaSintaxis: "En SQL, los textos se escriben entre comillas simples (ej: 'Española')."
