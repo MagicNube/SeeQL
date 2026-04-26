@@ -13,7 +13,7 @@ type ConsoleLog = { status: 'idle' | 'success' | 'error'; message: string; times
 const QUERIES_POR_DEFECTO: Record<EsquemaId, string> = {
   facil_biblioteca: "SELECT *\nFROM libros\nWHERE anio_publicacion > 1990",
   medio_gym: "SELECT nombre_completo, email\nFROM clientes\nORDER BY nombre_completo ASC",
-  dificil_aeropuerto: "SELECT numero_vuelo, hora_salida\nFROM vuelos\nWHERE id_aeropuerto_origen = 1"
+  dificil_aeropuerto: "SELECT numero_vuelo\nFROM vuelos\nWHERE id_aeropuerto_origen = 1"
 };
 
 export function Sandbox() {
