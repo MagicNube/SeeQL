@@ -61,7 +61,7 @@ export const Dashboard = () => {
             <div className="bg-blue-600/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
               <GraduationCap className="text-blue-400 w-8 h-8" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-3">Modo Aprendizaje</h3>
+            <h3 className="text-2xl font-bold text-white mb-3">Modo Lecciones</h3>
             <p className="text-slate-400 mb-8 leading-relaxed">
               Sigue el plan de estudios basado en el modelo relacional. 10 lecciones interactivas con validación en tiempo real.
             </p>
@@ -80,12 +80,11 @@ export const Dashboard = () => {
           <div className="group relative p-8 rounded-4xl bg-slate-800/40 border border-slate-700/50 hover:border-emerald-500/50 hover:bg-slate-800/60 transition-all duration-500 overflow-hidden shadow-2xl">
             <Zap className="absolute -right-8 -top-8 w-40 h-40 text-emerald-500/5 -rotate-12 group-hover:text-emerald-500/10 transition-colors" />
             <div className="bg-emerald-600/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
-              <LayoutGrid className="text-emerald-400 w-8 h-8" />
+              <Zap className="text-emerald-400 w-8 h-8" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-3">Sandbox Libre</h3>
             <p className="text-slate-400 mb-8 leading-relaxed">
-              Entorno sin restricciones. Crea tablas, inserta datos o carga tus propios archivos para practicar libremente.
-            </p>
+              Ejecuta sentencias SQL libremente, explora esquemas de datos y experimenta sin la presión de un objetivo guiado.            </p>
             <Link to="/sandbox" className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-900/20 active:scale-95">
               Abrir editor <ArrowRight className="w-5 h-5" />
             </Link>

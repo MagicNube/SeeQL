@@ -103,7 +103,7 @@ export const LECCIONES: Leccion[] = [
         teoria: 'Podemos combinar filtros. `AND` exige que se cumplan ambas condiciones. `OR` exige que se cumpla al menos una. `IN` busca dentro de una lista de valores.',
         pista: '¡Simplemente ejecuta, ya está resuelto!',
         solucionEsperada: 'SELECT titulo FROM libros WHERE anio_publicacion >= 1900 AND copias_disponibles > 1',
-        codigoInicial: 'SELECT titulo\nFROM libros\nWHERE anio_publicacion >= 1900 AND copias_disponibles > 1',
+        codigoInicial: 'SELECT titulo\nFROM libros\nWHERE anio_publicacion >= 1900\nAND copias_disponibles > 1',
       },
       {
         nivel: 2,
@@ -177,15 +177,17 @@ export const LECCIONES: Leccion[] = [
         esquema: 'medio_gym',
         enunciado: "Busca el nombre y el email de los clientes cuyo email termine exactamente en '@gmail.com'.",
         pista: "Usa el porcentaje al principio del patrón: '%@gmail.com'.",
-        solucionEsperada: "SELECT nombre_completo, email FROM clientes WHERE email LIKE '%@gmail.com'"
+        solucionEsperada: "SELECT nombre_completo, email FROM clientes WHERE email LIKE '%@gmail.com'",
+        ayudaSintaxis: "En SQL, los textos se escriben entre comillas simples."
       },
       {
         nivel: 3,
         dificultad: 'Difícil',
         esquema: 'dificil_aeropuerto',
-        enunciado: "Fabricante y nombre del modelo de los modelos de aviones cuyo fabricante contenga el texto 'Boeing' en cualquier parte del nombre.",
-        pista: "Rodea la palabra con porcentajes: '%Boeing%'.",
-        solucionEsperada: "SELECT fabricante, nombre_modelo FROM modelos_avion WHERE fabricante LIKE '%Boeing%'"
+        enunciado: "Busca el fabricante y el nombre de los modelos de aviones que contengan 'A3' en cualquier parte de su modelo.",
+        pista: "Rodea la palabra con porcentajes: '%A3%'.",
+        solucionEsperada: "SELECT fabricante, nombre_modelo FROM modelos_avion WHERE nombre_modelo LIKE '%A3%'",
+        ayudaSintaxis: "En SQL, los textos se escriben entre comillas simples."
       }
     ]
   },
