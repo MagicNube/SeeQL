@@ -184,7 +184,7 @@ export const LECCIONES: Leccion[] = [
         nivel: 3,
         dificultad: 'Difícil',
         esquema: 'dificil_aeropuerto',
-        enunciado: "Busca el fabricante y el nombre de los modelos de aviones que contengan 'A3' en cualquier parte de su modelo.",
+        enunciado: "Busca el fabricante y el nombre de los modelos de aviones que contengan 'A3' en cualquier parte del nombre del modelo.",
         pista: "Rodea la palabra con porcentajes: '%A3%'.",
         solucionEsperada: "SELECT fabricante, nombre_modelo FROM modelos_avion WHERE nombre_modelo LIKE '%A3%'",
         ayudaSintaxis: "En SQL, los textos se escriben entre comillas simples."

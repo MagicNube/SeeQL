@@ -7,7 +7,6 @@ export const traducirErrorSQL = (mensajeOriginal: string): string => {
     return 'La consulta está vacía. Escribe algo de código SQL para poder ejecutarlo.';
   }
 
-  // Chivato oculto para ti en desarrollo
   console.log("Supabase error original:", mensajeOriginal);
 
   // 1. Error de columna ambigua (La ponemos la primera para evitar conflictos)
@@ -31,7 +30,7 @@ export const traducirErrorSQL = (mensajeOriginal: string): string => {
     return `Columna inexistente: No encuentro la columna "${columna}". Revisa en la pizarra de estructura que esté bien escrita y que pertenezca a la tabla correcta.`;
   }
 
-  // 4. Error de sintaxis básica (Con tu frase añadida)
+  // 4. Error de sintaxis básica
   if (msg.includes('syntax error')) {
     const match = mensajeOriginal.match(/syntax error at or near ["']?([^"']+)["']?/i);
     const cercaDe = match ? match[1] : '';
