@@ -5,6 +5,8 @@ import { DatosPreview } from '../components/DatosPreview';
 import { PizarraInteractiva } from '../components/PizarraInteractiva';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { traducirErrorSQL } from '../utils/traductorSQL';
+import { Database } from 'sql.js';
+import { dbManager } from '../services/dbManager';
 
 type EsquemaId = 'facil_biblioteca' | 'medio_gym' | 'dificil_aeropuerto';
 type ColumnaDef = { name: string; type: string; isPk?: boolean; };
@@ -16,6 +18,7 @@ const QUERIES_POR_DEFECTO: Record<EsquemaId, string> = {
   dificil_aeropuerto: "SELECT numero_vuelo\nFROM vuelos\nWHERE id_aeropuerto_origen = 1"
 };
 
+
 export function Sandbox() {
   const esquemas: { id: EsquemaId; nombre: string }[] = [
     { id: 'facil_biblioteca', nombre: 'Biblioteca (Fácil)' },
@@ -25,6 +28,8 @@ export function Sandbox() {
 
   const [esquemaActivo, setEsquemaActivo] = useState<EsquemaId>(esquemas[0].id);
   const [consulta, setConsulta] = useState<string>(QUERIES_POR_DEFECTO[esquemas[0].id]);
+  const [db, setDb] = useState<Database | null>(null);
+
 
   const [estructuraActual, setEstructuraActual] = useState<Record<string, ColumnaDef[]>>({});
   const [relacionesActuales, setRelacionesActuales] = useState<any[]>([]);
@@ -95,14 +100,29 @@ export function Sandbox() {
         const { data: dataRelaciones } = await supabase.rpc('obtener_relaciones_esquema', { esquema_nombre: esquemaActivo });
         setRelacionesActuales(dataRelaciones || []);
 
+        const instanciaDb = await dbManager.createLocalDbFromSupabase(esquemaActivo);
+        setDb(instanciaDb);
+
         const tablas = Object.keys(estructura);
         const nuevosDatosPreview: Record<string, any[]> = {};
-        await Promise.all(
-          tablas.map(async (tabla) => {
-            const { data } = await supabase.schema(esquemaActivo).from(tabla).select('*');
-            nuevosDatosPreview[tabla] = data || [];
-          })
-        );
+
+        tablas.forEach((t) => {
+          try {
+            const res = instanciaDb.exec(`SELECT * FROM ${t}`);
+            if (res.length > 0) {
+              const columns = res[0].columns;
+              nuevosDatosPreview[t] = res[0].values.map(row => {
+                const obj: any = {};
+                columns.forEach((col, i) => { obj[col] = row[i]; });
+                return obj;
+              });
+            } else {
+              nuevosDatosPreview[t] = [];
+            }
+          } catch (e) {
+             nuevosDatosPreview[t] = [];
+          }
+        });
         setPreviewDatos(nuevosDatosPreview);
       } catch (err: any) {
         setEstructuraActual({}); setRelacionesActuales([]); setPreviewDatos({});
@@ -110,11 +130,12 @@ export function Sandbox() {
         setLoadingPizarra(false);
       }
     }
-    cargarEntorno();
+    cargarEntorno().catch(() => {});
   }, [esquemaActivo]);
 
   const ejecutarQuery = async () => {
-if (!consulta.trim()) {
+    if (!db) return;
+    if (!consulta.trim()) {
     setConsoleLog({
       status: 'error',
       message: 'La consulta está vacía. Escribe tu código SQL antes de ejecutar.',
@@ -129,18 +150,26 @@ if (!consulta.trim()) {
     const time = new Date().toLocaleTimeString();
 
     try {
-      if (!consulta.trim().toLowerCase().startsWith('select')) {
-        throw new Error("El Sandbox solo soporta consultas SELECT por motivos de seguridad.");
-      }
-      const { data, error: dbError } = await supabase.rpc('ejecutar_sql_sandbox', { query_text: consulta, esquema_nombre: esquemaActivo });
-      if (dbError) throw dbError;
+      const res = db.exec(consulta);
 
-      const filas = data || [];
-      setResultadosQuery(filas);
-      setColumnasQuery(filas.length > 0 ? Object.keys(filas[0]) : []);
-      setConsoleLog({ status: 'success', message: `Query ejecutada con éxito. Filas devueltas: ${filas.length}.`, timestamp: time });
+      let filas: Record<string, any>[] = [];
+      if (res.length > 0) {
+        const columns = res[0].columns;
+        filas = res[0].values.map(row => {
+          const obj: any = {};
+          columns.forEach((col, i) => { obj[col] = row[i]; });
+          return obj;
+        });
+        setResultadosQuery(filas);
+        setColumnasQuery(columns);
+        setConsoleLog({ status: 'success', message: `Query ejecutada con éxito en local. Filas devueltas: ${filas.length}.`, timestamp: time });
+      } else {
+        setResultadosQuery([]);
+        setColumnasQuery([]);
+        setConsoleLog({ status: 'success', message: 'Consulta ejecutada con éxito (la instrucción no ha devuelto registros).', timestamp: time });
+      }
     } catch (err: any) {
-      // Pasamos el error crudo por nuestro traductor mágico
+
       const mensajeOriginal = err.message || String(err);
       const mensajeAmigable = traducirErrorSQL(mensajeOriginal);
 

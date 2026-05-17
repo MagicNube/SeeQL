@@ -8,6 +8,11 @@ import { PizarraInteractiva } from '../components/PizarraInteractiva';
 import { LECCIONES } from '../data/lecciones';
 import { useAuth } from '../context/AuthContext';
 import { traducirErrorSQL } from '../utils/traductorSQL';
+
+import { Database } from 'sql.js';
+import { dbManager } from '../services/dbManager';
+
+
 import {
   Target,
   Lightbulb,
@@ -33,6 +38,9 @@ export function LeccionView() {
   const leccion = LECCIONES.find(l => l.id === leccionId);
   const [ejercicioActualIdx, setEjercicioActualIdx] = useState(0);
   const ejercicio = leccion?.ejercicios[ejercicioActualIdx];
+
+  const [db, setDb] = useState<Database | null>(null);
+  const [loadingDb, setLoadingDb] = useState(true);
 
   const [consulta, setConsulta] = useState(ejercicio?.codigoInicial || '');
   const [estructuraActual, setEstructuraActual] = useState<Record<string, ColumnaDef[]>>({});
@@ -145,24 +153,51 @@ export function LeccionView() {
         if (isCancelled) return;
         setRelacionesActuales(relaciones || []);
 
+        const instanciaDb = await dbManager.createLocalDbFromSupabase(ejercicio.esquema);
+        if (isCancelled) return;
+        setDb(instanciaDb);
+
         const tablas = Object.keys(estructura || {});
         const nuevosDatos: Record<string, Record<string, any>[]> = {};
-        await Promise.all(tablas.map(async (t) => {
-          const { data } = await supabase.schema(ejercicio.esquema).from(t).select('*');
-          nuevosDatos[t] = data || [];
-        }));
-        if (isCancelled) return;
+        tablas.forEach((t) => {
+          try {
+            const res = instanciaDb.exec(`SELECT * FROM ${t}`);
+            if (res.length > 0) {
+              const columns = res[0].columns;
+              nuevosDatos[t] = res[0].values.map(row => {
+                const obj: any = {};
+                columns.forEach((col, i) => { obj[col] = row[i]; });
+                return obj;
+              });
+            } else {
+              nuevosDatos[t] = [];
+            }
+          } catch (e) {
+             nuevosDatos[t] = [];
+          }
+        });
         setPreviewDatos(nuevosDatos);
 
-        const { data: dataResultado } = await supabase.rpc('ejecutar_sql_sandbox', {
-          query_text: ejercicio.solucionEsperada,
-          esquema_nombre: ejercicio.esquema
-        });
-        if (isCancelled) return;
-        if (dataResultado) {
-          setResultadoEsperado(dataResultado);
-          setColumnasEsperadas(dataResultado.length > 0 ? Object.keys(dataResultado[0]) : []);
+        try {
+          const resEsperado = instanciaDb.exec(ejercicio.solucionEsperada);
+          if (resEsperado.length > 0) {
+            const columns = resEsperado[0].columns;
+            const dataObj = resEsperado[0].values.map(row => {
+              const obj: any = {};
+              columns.forEach((col, i) => { obj[col] = row[i]; });
+              return obj;
+            });
+            setResultadoEsperado(dataObj);
+            setColumnasEsperadas(columns);
+          } else {
+            setResultadoEsperado([]);
+            setColumnasEsperadas([]);
+          }
+        } catch (e) {
+          setResultadoEsperado([]);
+          setColumnasEsperadas([]);
         }
+
       } catch (err) {
         console.error(err);
       } finally {
@@ -197,29 +232,36 @@ export function LeccionView() {
   };
 
   const ejecutarQuery = async () => {
-    if (!ejercicio || isExploring) return;
+    if (!ejercicio || isExploring || !db) return;
 
     if (!consulta.trim()) {
-    setMensajeConsola('La consulta está vacía. Escribe tu código SQL antes de validar.');
-    setActiveTab('output');
-    setIsConsoleOpen(true);
-    return;
-  }
+      setMensajeConsola('La consulta está vacía. Escribe tu código SQL antes de validar.');
+      setActiveTab('output');
+      setIsConsoleOpen(true);
+      return;
+    }
 
     setMensajeConsola('Verificando...');
     setActiveTab('output');
     setIsConsoleOpen(true);
 
     try {
-      const { data, error } = await supabase.rpc('ejecutar_sql_sandbox', {
-        query_text: consulta,
-        esquema_nombre: ejercicio.esquema
-      });
-      if (error) throw error;
+      const res = db.exec(consulta);
 
-      const filas = data || [];
-      setResultadosQuery(filas);
-      setColumnasQuery(filas.length > 0 ? Object.keys(filas[0]) : []);
+      let filas: Record<string, any>[] = [];
+      if (res.length > 0) {
+        const columns = res[0].columns;
+        filas = res[0].values.map(row => {
+          const obj: any = {};
+          columns.forEach((col, i) => { obj[col] = row[i]; });
+          return obj;
+        });
+        setResultadosQuery(filas);
+        setColumnasQuery(columns);
+      } else {
+        setResultadosQuery([]);
+        setColumnasQuery([]);
+      }
 
       const isCorrect = sonResultadosIguales(filas, resultadoEsperado);
 

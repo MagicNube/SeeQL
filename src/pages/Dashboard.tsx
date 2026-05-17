@@ -4,6 +4,7 @@ import { GraduationCap, ArrowRight, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 
+
 export const Dashboard = () => {
   const { user } = useAuth();
   const [leccionesCompletadas, setLeccionesCompletadas] = useState<number>(0);
