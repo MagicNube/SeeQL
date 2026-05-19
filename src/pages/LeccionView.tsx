@@ -269,11 +269,10 @@ export function LeccionView() {
         setMensajeConsola('¡Excelente! Has conseguido los datos que buscábamos.');
         setIsSuccess(true);
 
-        // --- AÑADIMOS EL RETARDO AQUÍ ---
         setTimeout(() => {
           setShowSuccessPopup(true);
         }, 600);
-        // --------------------------------
+
 
         if (ejercicioActualIdx === leccion.ejercicios.length - 1 && user) {
           await supabase.from('progreso_usuarios').upsert({
@@ -494,7 +493,17 @@ export function LeccionView() {
           <div className={`flex-1 overflow-auto bg-[#0a0f1d] p-4 font-mono text-sm custom-scrollbar ${isConsoleOpen ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}>
              {activeTab === 'output' && (
                <>
-                 <p className={`mb-4 ${isSuccess ? 'text-emerald-400 font-black' : 'text-slate-400'}`}>{mensajeConsola}</p>
+                 <p className={`mb-4 p-3 rounded-r-lg border-l-4 transition-all ${
+  isSuccess
+    ? 'text-emerald-400 font-black border-emerald-500 bg-emerald-950/30'
+    : mensajeConsola.includes('no son exactamente')
+    ? 'text-amber-400 font-bold border-amber-500 bg-amber-950/30'
+    : mensajeConsola.includes('motor está listo') || mensajeConsola.includes('Verificando') || mensajeConsola.includes('vacía')
+    ? 'text-slate-400 border-transparent bg-transparent pl-0'
+    : 'text-red-400 font-bold border-red-500 bg-red-950/30'
+}`}>
+  {mensajeConsola}
+</p>
                  {resultadosQuery.length > 0 && <table className="w-full text-left text-[11px] text-slate-300"><thead className="bg-slate-800 text-slate-400 uppercase tracking-tighter"><tr>{columnasQuery.map(c => <th key={c} className="p-2 border border-slate-700 font-bold">{c}</th>)}</tr></thead><tbody>{resultadosQuery.slice(0, 10).map((r, i) => <tr key={i} className="hover:bg-slate-800/40 transition-colors">{columnasQuery.map(c => <td key={c} className="p-2 border border-slate-800/50">{String(r[c])}</td>)}</tr>)}</tbody></table>}
                </>
              )}
