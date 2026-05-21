@@ -5,7 +5,7 @@ import { DatosPreview } from '../components/DatosPreview';
 import { PizarraInteractiva } from '../components/PizarraInteractiva';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { traducirErrorSQL } from '../utils/traductorSQL';
-import { Database } from 'sql.js';
+import type { Database } from 'sql.js';
 import { dbManager } from '../services/dbManager';
 
 type EsquemaId = 'facil_biblioteca' | 'medio_gym' | 'dificil_aeropuerto';
@@ -17,7 +17,6 @@ const QUERIES_POR_DEFECTO: Record<EsquemaId, string> = {
   medio_gym: "SELECT nombre_completo, email\nFROM clientes\nORDER BY nombre_completo ASC",
   dificil_aeropuerto: "SELECT numero_vuelo\nFROM vuelos\nWHERE id_aeropuerto_origen = 1"
 };
-
 
 export function Sandbox() {
   const esquemas: { id: EsquemaId; nombre: string }[] = [

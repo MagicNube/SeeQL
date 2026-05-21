@@ -524,7 +524,21 @@ const content = (
       });
     }
 
-    setNodes(newNodes);
+    setNodes((nodosActuales) => {
+      return newNodes.map((nuevoNodo) => {
+        const nodoExistente = nodosActuales.find((n) => n.id === nuevoNodo.id);
+
+        if (nodoExistente) {
+          return {
+            ...nuevoNodo,
+            position: nodoExistente.position
+          };
+        }
+
+        return nuevoNodo;
+      });
+    });
+
     setEdges(newEdges);
 
   }, [normalizedTables, mergedTable, groupedTable, activeTables, whereAST, havingAST, joinDetails, orderBy, isSelectAll, limit, focusedTable, query, tables, setNodes, setEdges, setFocusedTable]);

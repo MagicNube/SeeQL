@@ -223,8 +223,24 @@ export const PizarraInteractiva = ({ estructura, relaciones }: { estructura: any
       isFirstRender.current = false;
       return;
     }
-    setNodes(initialNodes);
+
+    setNodes((nodosActuales) => {
+      return initialNodes.map((nuevoNodo) => {
+        const nodoExistente = nodosActuales.find((n) => n.id === nuevoNodo.id);
+
+        if (nodoExistente) {
+          return {
+            ...nuevoNodo,
+            position: nodoExistente.position
+          };
+        }
+
+        return nuevoNodo;
+      });
+    });
+
     setEdges(initialEdges);
+
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
   const onReconnect = useCallback(
