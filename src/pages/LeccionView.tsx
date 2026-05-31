@@ -241,6 +241,17 @@ export function LeccionView() {
       return;
     }
 
+    const upperQuery = consulta.trim().toUpperCase();
+    if (/^(DELETE|UPDATE|INSERT|DROP|ALTER|CREATE|TRUNCATE)/.test(upperQuery)) {
+      const match = upperQuery.match(/^(DELETE|UPDATE|INSERT|DROP|ALTER|CREATE|TRUNCATE)/);
+      const comando = match ? match[0] : 'modificación';
+      setMensajeConsola(`Esta lección no es de ${comando}. Solo necesitas realizar consultas (SELECT) para extraer información y superar el reto.`);
+      setIsSuccess(false);
+      setActiveTab('output');
+      setIsConsoleOpen(true);
+      return;
+    }
+
     setMensajeConsola('Verificando...');
     setActiveTab('output');
     setIsConsoleOpen(true);
