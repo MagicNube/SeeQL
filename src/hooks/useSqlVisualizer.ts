@@ -40,7 +40,6 @@ const resolveColumn = (row: any, column: string, table?: string) => {
 export const evaluateWhere = (row: any, ast: any): boolean => {
   if (!ast) return true;
 
-  // Manejo de valores literales y referencias a columnas
   if (ast.type === 'column_ref') {
     const val = resolveColumn(row, ast.column, ast.table);
     return val !== undefined ? val : false;
@@ -53,7 +52,6 @@ export const evaluateWhere = (row: any, ast: any): boolean => {
   if (ast.type === 'binary_expr') {
     const { left, right, operator } = ast;
 
-    // RECURSIVIDAD LÓGICA: Evaluamos ramas completas antes de aplicar AND/OR
     if (operator === 'AND') {
       return evaluateWhere(row, left) && evaluateWhere(row, right);
     }
@@ -61,32 +59,41 @@ export const evaluateWhere = (row: any, ast: any): boolean => {
       return evaluateWhere(row, left) || evaluateWhere(row, right);
     }
 
-    // COMPARACIÓN ESTÁNDAR: Resolvemos valores finales
     const resolveValue = (node: any) => {
       if (!node) return undefined;
       if (node.type === 'column_ref') return resolveColumn(row, node.column, node.table);
-      if (node.type === 'number' || node.type === 'string' || node.type === 'single_quote_string') return node.value;
       return node.value;
     };
 
     const leftVal = resolveValue(left);
     const rightVal = resolveValue(right);
 
-    // Si la columna no existe en esta fila, no podemos comparar
     if (leftVal === undefined && left.type === 'column_ref') return false;
 
+    const leftNum = Number(leftVal);
+    const rightNum = Number(rightVal);
+    const esNumerico = !isNaN(leftNum) && !isNaN(rightNum);
+
     switch (operator) {
-      case '=': return String(leftVal).toLowerCase() === String(rightVal).toLowerCase();
-      case '>': return Number(leftVal) > Number(rightVal);
-      case '<': return Number(leftVal) < Number(rightVal);
-      case '>=': return Number(leftVal) >= Number(rightVal);
-      case '<=': return Number(leftVal) <= Number(rightVal);
+      case '=':
+        return String(leftVal).toLowerCase() === String(rightVal).toLowerCase();
+      case '>':
+        return esNumerico ? leftNum > rightNum : String(leftVal) > String(rightVal);
+      case '<':
+        return esNumerico ? leftNum < rightNum : String(leftVal) < String(rightVal);
+      case '>=':
+        return esNumerico ? leftNum >= rightNum : String(leftVal) >= String(rightVal);
+      case '<=':
+        return esNumerico ? leftNum <= rightNum : String(leftVal) <= String(rightVal);
       case '!=':
-      case '<>': return String(leftVal).toLowerCase() !== String(rightVal).toLowerCase();
+      case '<>':
+        return String(leftVal).toLowerCase() !== String(rightVal).toLowerCase();
       case 'LIKE':
-        const regex = String(rightVal).replace(/%/g, '.*');
-        return new RegExp(`^${regex}$`, 'i').test(String(leftVal));
-      default: return true;
+        const escapadoRegex = String(rightVal).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const patronRegex = escapadoRegex.replace(/%/g, '.*');
+        return new RegExp(`^${patronRegex}$`, 'i').test(String(leftVal));
+      default:
+        return true;
     }
   }
 
@@ -103,8 +110,6 @@ export const useSqlVisualizer = (query: string) => {
   const [groupBy, setGroupBy] = useState<string[]>([]);
   const [aggregations, setAggregations] = useState<Aggregation[]>([]);
   const [havingAST, setHavingAST] = useState<any>(null);
-
-  // NUEVO ESTADO PARA LIMIT
   const [limit, setLimit] = useState<number | null>(null);
 
   useEffect(() => {
@@ -165,7 +170,7 @@ export const useSqlVisualizer = (query: string) => {
       }
     }
 
-    const joinConditionRegex = /(LEFT\s+JOIN|INNER\s+JOIN|JOIN)\s+([a-zA-Z0-9_]+)\s+ON\s+([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)\s*=\s*([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/i;
+    const joinConditionRegex = /(LEFT\s+JOIN|INNER\s+JOIN|JOIN)\s+([a-zA-Z0-9_]+)\s+ON\s*\(?\s*([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)\s*=\s*([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)\s*\)?/i;
     const jm = cleanQuery.match(joinConditionRegex);
     if (jm && currentMainTable) {
       const joinType = jm[1].toUpperCase().includes('LEFT') ? 'LEFT JOIN' : 'INNER JOIN';
@@ -187,7 +192,6 @@ export const useSqlVisualizer = (query: string) => {
        parsedGroupBy = groupByMatch[1].split(',').map(s => s.trim().split('.')[1] || s.trim());
     }
 
-    // NUEVO: PARSEAR LIMIT
     const limitMatch = cleanQuery.match(/LIMIT\s+(\d+)/i);
     let parsedLimit: number | null = null;
     if (limitMatch) {
@@ -212,7 +216,7 @@ export const useSqlVisualizer = (query: string) => {
     setActiveTables(parsedTables); setSelectedColumns(parsedSelectedCols);
     setIsSelectAll(isAll); setJoinDetails(parsedJoin); setOrderBy(parsedOrderBy);
     setGroupBy(parsedGroupBy); setAggregations(parsedAggregations); setHavingAST(parsedHavingAST);
-    setLimit(parsedLimit); // Guardamos el limit en el estado
+    setLimit(parsedLimit);
   }, [query]);
 
   return { activeTables, whereAST, joinDetails, selectedColumns, isSelectAll, orderBy, groupBy, aggregations, havingAST, limit };
