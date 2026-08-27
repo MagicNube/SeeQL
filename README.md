@@ -1,73 +1,142 @@
-# React + TypeScript + Vite
+# SeeQL
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interactive web platform for learning SQL through real-time visualizations.
 
-Currently, two official plugins are available:
+Built as my **Bachelor's Thesis**, SeeQL combines a client-side SQL execution engine with an educational interface that helps students understand how SQL queries transform relational data.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Final Grade:** 10/10  
+**Honors Recommendation (Matrícula de Honor proposed)**
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ Features
 
-## Expanding the ESLint configuration
+- 🧠 Learn SQL through interactive lessons
+- ⚡ Execute SQL entirely in the browser using WebAssembly
+- 📊 Visualize relational transformations in real time
+- 🧪 Sandbox mode for free experimentation
+- 🔐 User authentication and progress persistence
+- 📚 Progressive learning path
+- 💡 Immediate visual feedback
+- 🚀 Zero-latency query execution
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🏗 Architecture
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+SeeQL follows a client-side architecture where query execution happens entirely inside the browser.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+                React UI
+                    │
+                    ▼
+          SQL Editor & Visualizer
+                    │
+                    ▼
+        SQL.js (WebAssembly Engine)
+                    │
+                    ▼
+          AST Processing & Analysis
+                    │
+                    ▼
+        Interactive Visualization
+
+────────────── Cloud ──────────────
+
+      Authentication (Supabase)
+      Progress persistence
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+This approach provides:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- Instant query execution
+- No backend required for SQL processing
+- Safe experimentation
+- Low latency
+- Offline execution of SQL queries
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+
+- React
+- TypeScript
+- Vite
+- React Flow
+
+### SQL Engine
+
+- SQL.js
+- WebAssembly
+
+### Backend Services
+
+- Supabase
+- PostgreSQL
+
+### Tooling
+
+- GitHub Actions
+- Vercel
+
+---
+
+## 📸 Screenshots
+
+*(Add screenshots here)*
+
+### Landing Page
+
+![Landing](docs/images/landing.png)
+
+### Lesson Mode
+
+![Lessons](docs/images/lessons.png)
+
+### Sandbox
+
+![Sandbox](docs/images/sandbox.png)
+
+---
+
+## 🚀 Running locally
+
+```bash
+git clone https://github.com/MagicNube/SeeQL.git
+
+cd SeeQL
+
+npm install
+
+npm run dev
 ```
+
+---
+
+## 📖 Documentation
+
+The repository contains the complete Bachelor's Thesis describing:
+
+- Requirements analysis
+- Software architecture
+- Technology choices
+- SQL execution engine
+- User evaluation
+- Testing
+- Educational design
+
+---
+
+## 🎓 Academic Context
+
+SeeQL was developed as my Bachelor's Thesis in Computer Engineering at the **Universitat Politècnica de València (UPV)**.
+
+The project explores how interactive visualization and client-side execution can improve SQL learning by reducing the cognitive gap between syntax and relational transformations.
+
+---
+
+## 📄 License
+
+MIT
