@@ -1,107 +1,121 @@
+<div align="center">
+
 # SeeQL
 
-Interactive web platform for learning SQL through real-time visualizations.
+### Interactive SQL Learning Platform
 
-Built as my **Bachelor's Thesis**, SeeQL combines a client-side SQL execution engine with an educational interface that helps students understand how SQL queries transform relational data.
+**Master SQL by seeing your data.**
 
-**Final Grade:** 10/10  
-**Honors Recommendation (Matrícula de Honor proposed)**
+Learn SQL through **real-time visualizations** powered by a **client-side WebAssembly engine**.
+
+Developed as my Bachelor's Thesis at the **Universitat Politècnica de València (UPV)**.
+
+**⭐ Final Grade: 10/10 · Honors Recommendation**
+
+<br>
+
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-2563EB?style=for-the-badge)](https://see-ql.vercel.app)
+[![Video Demo](https://img.shields.io/badge/🎥_Video_Demo-FF0000?style=for-the-badge)](https://youtu.be/lvYT9PO54WY)
+[![Technical Report](https://img.shields.io/badge/📄_Technical_Report-4B5563?style=for-the-badge)](./docs/thesis.pdf)
+
+<br>
+
+<img src="./docs/demo.gif" alt="SeeQL Demo">
+
+</div>
 
 ---
 
 ## ✨ Features
 
-- 🧠 Learn SQL through interactive lessons
-- ⚡ Execute SQL entirely in the browser using WebAssembly
+- ⚡ Execute SQL queries entirely in the browser using **WebAssembly**
 - 📊 Visualize relational transformations in real time
-- 🧪 Sandbox mode for free experimentation
-- 🔐 User authentication and progress persistence
-- 📚 Progressive learning path
-- 💡 Immediate visual feedback
-- 🚀 Zero-latency query execution
+- 🎓 Learn SQL through guided interactive lessons
+- 🧪 Experiment freely in a SQL sandbox
+- 🔒 Secure client-side execution with no SQL backend
+- ☁️ Authentication and progress persistence with Supabase
+- 🚀 Instant query execution with zero network latency
 
 ---
 
-## 🏗 Architecture
+# 📸 Screenshots
 
-SeeQL follows a client-side architecture where query execution happens entirely inside the browser.
+## Dashboard
 
-```
-                React UI
-                    │
-                    ▼
-          SQL Editor & Visualizer
-                    │
-                    ▼
-        SQL.js (WebAssembly Engine)
-                    │
-                    ▼
-          AST Processing & Analysis
-                    │
-                    ▼
-        Interactive Visualization
+Start your learning journey through guided lessons or experiment freely in the SQL sandbox.
 
-────────────── Cloud ──────────────
-
-      Authentication (Supabase)
-      Progress persistence
-```
-
-This approach provides:
-
-- Instant query execution
-- No backend required for SQL processing
-- Safe experimentation
-- Low latency
-- Offline execution of SQL queries
+<p align="center">
+<img src="./docs/images/dashboard.png" width="100%">
+</p>
 
 ---
 
-## 🛠 Tech Stack
+## Guided Lessons
 
-### Frontend
+Progress through interactive lessons with explanations, hints and real-time validation.
 
-- React
-- TypeScript
-- Vite
-- React Flow
-
-### SQL Engine
-
-- SQL.js
-- WebAssembly
-
-### Backend Services
-
-- Supabase
-- PostgreSQL
-
-### Tooling
-
-- GitHub Actions
-- Vercel
+<p align="center">
+<img src="./docs/images/leccion.png" width="100%">
+</p>
 
 ---
 
-## 📸 Screenshots
+## SQL Sandbox
 
-*(Add screenshots here)*
+Write SQL freely and instantly visualize how your queries transform relational data.
 
-### Landing Page
-
-![Landing](docs/images/landing.png)
-
-### Lesson Mode
-
-![Lessons](docs/images/lessons.png)
-
-### Sandbox
-
-![Sandbox](docs/images/sandbox.png)
+<p align="center">
+<img src="./docs/images/sandbox.png" width="100%">
+</p>
 
 ---
 
-## 🚀 Running locally
+## Landing Page
+
+Modern authentication, progress tracking and quick access to learning modes.
+
+<p align="center">
+<img src="./docs/images/landing.png" width="100%">
+</p>
+
+---
+
+# 🏗 Architecture
+
+SeeQL follows a **client-side architecture** where SQL execution happens entirely inside the browser.
+
+React is responsible for the user interface, while SQL.js running through WebAssembly executes SQL locally without requiring a backend server.
+
+Supabase is only responsible for authentication and user progress persistence.
+
+<p align="center">
+<img src="./docs/architecture.png" width="900">
+</p>
+
+### Why this architecture?
+
+- ⚡ Instant SQL execution
+- 🔒 Safe experimentation
+- 🌐 Works with minimal backend infrastructure
+- 📉 Low latency
+- 🧠 Better learning experience through immediate feedback
+
+---
+
+# 🛠 Tech Stack
+
+| Category | Technologies |
+|----------|--------------|
+| Frontend | React · TypeScript · Vite |
+| SQL Engine | SQL.js · WebAssembly |
+| Editor | Monaco Editor |
+| SQL Parser | node-sql-parser |
+| Backend Services | Supabase |
+| Deployment | Vercel |
+
+---
+
+# 🚀 Running locally
 
 ```bash
 git clone https://github.com/MagicNube/SeeQL.git
@@ -115,28 +129,23 @@ npm run dev
 
 ---
 
-## 📖 Documentation
+# 📖 Documentation
 
-The repository contains the complete Bachelor's Thesis describing:
+The repository includes the complete Bachelor's Thesis covering:
 
-- Requirements analysis
 - Software architecture
-- Technology choices
+- Requirements analysis
+- Technology decisions
 - SQL execution engine
-- User evaluation
-- Testing
+- Interactive visualization
 - Educational design
+- User evaluation
+- Testing methodology
+
+📄 **Technical Report:** [`docs/thesis.pdf`](./docs/thesis.pdf)
 
 ---
 
-## 🎓 Academic Context
-
-SeeQL was developed as my Bachelor's Thesis in Computer Engineering at the **Universitat Politècnica de València (UPV)**.
-
-The project explores how interactive visualization and client-side execution can improve SQL learning by reducing the cognitive gap between syntax and relational transformations.
-
----
-
-## 📄 License
+# 📄 License
 
 MIT
