@@ -55,7 +55,7 @@ Start your learning journey through guided lessons or experiment freely in the S
 Progress through interactive lessons with explanations, hints and real-time validation.
 
 <p align="center">
-<img src="./docs/images/leccion.png" width="100%">
+<img src="./docs/images/lesson.png" width="100%">
 </p>
 
 ---
