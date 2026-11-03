@@ -2,153 +2,117 @@
 
 # SeeQL
 
-### Interactive SQL Learning & Visualization Platform
+**Learn SQL by seeing how queries transform data.**
 
-**Master SQL by seeing your data.**
+A visual SQL learning environment with an in-browser SQLite engine, guided lessons and an interactive sandbox.
 
-Execute SQL queries directly in your browser and understand them through **real-time relational visualizations** powered by **WebAssembly**.
+[Live app](https://see-ql.vercel.app/) · [Video walkthrough](https://youtu.be/lvYT9PO54WY) · [Thesis](docs/thesis.pdf) · [My portfolio](https://jesuscaravaca.web.app/)
 
-🎓 Developed as my **Bachelor's Thesis** at the **Universitat Politècnica de València (UPV)**
+![React](https://img.shields.io/badge/React-19-149eca?style=flat-square&logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178c6?style=flat-square&logo=typescript&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-WebAssembly-003b57?style=flat-square&logo=sqlite)
 
-⭐ **Final Grade: 10/10 · Honors Recommendation**
-
-<br>
-
-![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
-![WebAssembly](https://img.shields.io/badge/WebAssembly-654FF0?style=flat-square&logo=webassembly&logoColor=white)
-![SQL.js](https://img.shields.io/badge/SQL.js-003B57?style=flat-square)
-![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)
-![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white)
-
-<br><br>
-
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-2563EB?style=for-the-badge)](https://see-ql.vercel.app)
-[![Video Demo](https://img.shields.io/badge/🎥_Video_Demo-FF0000?style=for-the-badge)](https://youtu.be/lvYT9PO54WY)
-[![Technical Report](https://img.shields.io/badge/📄_Technical_Report-4B5563?style=for-the-badge)](./docs/thesis.pdf)
-
-<br><br>
-
-<p align="center">
-  <img src="./docs/demo.gif" alt="SeeQL Demo" width="900">
-</p>
+<img src="docs/demo.gif" alt="SeeQL query editor and relational visualisation in action" width="900">
 
 </div>
 
----
+## The idea
 
-# ✨ Features
+Learning SQL on paper made it hard for me to connect a query with the rows it actually changes or selects. Setting up a database added friction before I could even practise. I built SeeQL to bring the editor, data and explanation into the same place.
 
-- ⚡ Execute SQL queries entirely in the browser using **WebAssembly**
-- 📊 Visualize relational transformations in real time
-- 🎓 Learn SQL through guided interactive lessons
-- 🧪 Experiment freely in a SQL sandbox
-- 🔒 Safe client-side execution with no SQL server required
-- ☁️ Authentication and progress persistence with Supabase
-- 🚀 Instant query execution with zero network latency
+Developed as my **Bachelor's thesis at Universitat Politècnica de València (UPV)**: **10/10, with an honours recommendation**.
 
----
+## What you can do
 
-# 📸 Screenshots
+- Run SQL against a SQLite database in the browser through `sql.js` and WebAssembly.
+- Inspect tables, relationships, JOINs and filters through interactive diagrams.
+- Follow guided lessons or explore sample datasets in the sandbox.
+- Get learning-oriented feedback when a query contains an error.
+- Save lesson progress with a Supabase account. The dashboard and sandbox also have guest routes.
 
-## Dashboard
+Executing a query happens locally once the example data has loaded; it does not require a SQL execution request to a server. Initial dataset loading, authentication and progress storage still use Supabase.
 
-Start your learning journey through guided lessons or experiment freely in the SQL sandbox.
+## A closer look
 
-<p align="center">
-<img src="./docs/images/dashboard.png" width="100%">
-</p>
+<img src="docs/images/sandbox.png" alt="SQL sandbox with the editor, example data and query visualisation" width="100%">
 
-## Guided Lessons
+<details>
+<summary>More screenshots</summary>
 
-Follow structured lessons with explanations, hints and real-time visual feedback.
+### Guided lessons
 
-<p align="center">
-<img src="./docs/images/lesson-mode.png" width="100%">
-</p>
+<img src="docs/images/lesson-mode.png" alt="Guided SQL lesson with exercises and visual feedback" width="100%">
 
-## SQL Sandbox
+### Dashboard
 
-Write SQL freely and instantly visualize how your queries transform relational data.
+<img src="docs/images/dashboard.png" alt="Dashboard with access to lessons and the SQL sandbox" width="100%">
 
-<p align="center">
-<img src="./docs/images/sandbox.png" width="100%">
-</p>
+### Welcome screen
 
-## Welcome Screen
+<img src="docs/images/landing.png" alt="SeeQL welcome screen and account access" width="100%">
 
-Simple authentication with progress persistence across sessions.
+</details>
 
-<p align="center">
-<img src="./docs/images/landing.png" width="100%">
-</p>
+## How it works
 
----
+```text
+SQL query
+  ├─ sql.js / SQLite / WebAssembly → query result
+  └─ node-sql-parser → AST → React Flow visualisation
 
-# 🏗 Architecture
+Supabase → sample schemas and data, authentication, saved progress
+```
 
-SeeQL follows a **client-side architecture** where SQL parsing, execution and visualization happen entirely inside the browser.
+React and TypeScript coordinate the editor, local engine and visualisation. `node-sql-parser` supplies the syntax tree; the application turns it into the relationships and highlighted rows shown in React Flow. Monaco provides the query editor.
 
-React is responsible for the user interface, while **SQL.js** running through **WebAssembly** executes queries locally. **Supabase** is only responsible for authentication and user progress persistence.
+<details>
+<summary>Architecture diagram</summary>
 
-<p align="center">
-<img src="./docs/architecture.png" width="900">
-</p>
+<img src="docs/architecture.png" alt="SeeQL architecture connecting the React interface, local SQL engine and Supabase services" width="900">
 
-### Why this architecture?
+</details>
 
-- ⚡ Instant SQL execution
-- 🔒 Safe experimentation
-- 🌐 Minimal backend infrastructure
-- 📉 Low latency
-- 🧠 Immediate visual feedback for learning
+## Run locally
 
----
+Use Node.js 22.12+ or Node.js 24 and npm.
 
-# 🛠 Tech Stack
-
-| Category | Technologies |
-|-----------|--------------|
-| **Frontend** | React · TypeScript · Vite |
-| **SQL Engine** | SQL.js · WebAssembly |
-| **SQL Parser** | node-sql-parser |
-| **Editor** | Monaco Editor |
-| **Backend Services** | Supabase |
-| **Deployment** | Vercel |
-
----
-
-# 🚀 Running locally
-
-```bash
+```sh
 git clone https://github.com/MagicNube/SeeQL.git
-
 cd SeeQL
+npm ci
+```
 
-npm install
+Copy `.env.example` to `.env.local` and provide the URL and browser-safe anon key for **your own Supabase project**:
 
+```dotenv
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-public-anon-key
+```
+
+Use the public anon key, not a service-role key: Vite exposes these values to the browser.
+
+```sh
 npm run dev
 ```
 
----
+Open the address printed by Vite. A valid Supabase configuration is required even for guest routes because the app initialises its client on startup and loads example datasets from it.
 
-# 📖 Documentation
+### Supabase setup status
 
-The repository includes the complete Bachelor's Thesis covering:
+The current app expects sample schemas, the `progreso_usuarios` table and the RPC functions `obtener_estructura_esquema` and `obtener_relaciones_esquema`. The repository includes example PostgreSQL datasets in [`database/postgres_backend/`](database/postgres_backend/) and their SQLite counterparts in [`database/sqlite_frontend/`](database/sqlite_frontend/), but does **not** yet contain a complete automated Supabase bootstrap. Cloning the repository and setting two environment variables alone does not provision that backend.
 
-- Software architecture
-- Requirements analysis
-- Technology decisions
-- SQL execution engine
-- Interactive visualization
-- Educational design
-- User evaluation
-- Testing methodology
+## Checks
 
-📄 **Technical Report:** [`docs/thesis.pdf`](./docs/thesis.pdf)
+```sh
+npm test -- --run
+npm run test:coverage
+npm run build
+```
 
----
+## Documentation
 
-# 📄 License
+The [Spanish thesis](docs/thesis.pdf) covers requirements, architecture, implementation decisions, testing and evaluation with students and teaching staff.
 
-MIT
+## License
+
+MIT, as declared by the original project README. The standalone `LICENSE` file is not yet included in the repository.
